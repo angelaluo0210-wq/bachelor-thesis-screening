@@ -1,9 +1,8 @@
 """Train a frozen-PubMedBERT classifier head for article screening.
 
-The existing review-level train/validation/test split is treated as immutable.
-By default, test.csv is read only for its review keys so that leakage can be
-checked without exposing test labels to model selection.  Pass
-``--evaluate-test`` only for a final, explicitly requested test evaluation.
+The existing review-level splits are treated as immutable. During ordinary
+training only train.csv and validation.csv are opened. Pass ``--evaluate-test``
+only for a final, explicitly requested test evaluation.
 """
 
 from __future__ import annotations
@@ -58,6 +57,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--split-dir", type=Path, default=DEFAULT_SPLIT_DIR)
     parser.add_argument("--criteria-path", type=Path, default=DEFAULT_CRITERIA_PATH)
     parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument(
+        "--model-name-or-path",
+        default=MODEL_NAME,
+        help="Hugging Face checkpoint name or a local model/tokenizer directory.",
+    )
+    parser.add_argument(
+        "--require-cuda",
+        action="store_true",
+        help="Fail instead of silently training on CPU/MPS (recommended for formal runs).",
+    )
     parser.add_argument(
         "--pooling",
         choices=("cls", "mean", "attention", "concat"),
@@ -170,9 +179,10 @@ def load_splits(split_dir: Path, evaluate_test: bool) -> dict[str, pd.DataFrame]
     splits = {
         "train": read_split(split_dir / "train.csv"),
         "validation": read_split(split_dir / "validation.csv"),
-        # Test labels are deliberately not loaded unless final evaluation is enabled.
-        "test": read_split(split_dir / "test.csv", review_keys_only=not evaluate_test),
     }
+    # Do not even open test.csv during tuning/model selection.
+    if evaluate_test:
+        splits["test"] = read_split(split_dir / "test.csv")
     return splits
 
 
@@ -344,11 +354,15 @@ def validate_splits(splits: dict[str, pd.DataFrame], evaluate_test: bool) -> Non
         name: set(frame[REVIEW_COLUMN].dropna().astype(str))
         for name, frame in splits.items()
     }
-    for left, right in (("train", "validation"), ("train", "test"), ("validation", "test")):
+    pairs = [("train", "validation")]
+    if evaluate_test:
+        pairs.extend((("train", "test"), ("validation", "test")))
+    for left, right in pairs:
         overlap = sorted(review_sets[left] & review_sets[right])
         if overlap:
             raise ValueError(f"Review leakage between {left} and {right}: {overlap}")
-    LOGGER.info("Review-level leakage QC: PASS (train/validation/test are disjoint)")
+    checked = "train/validation/test" if evaluate_test else "train/validation"
+    LOGGER.info("Review-level leakage QC: PASS (%s are disjoint)", checked)
     validate_labels(splits["train"], "train")
     validate_labels(splits["validation"], "validation")
     if evaluate_test:
@@ -987,7 +1001,7 @@ def save_checkpoint(
             "attention_pooling_trainable": model.attention_scorer is not None,
         },
         "training_arguments": serializable_args(args),
-        "model_name": MODEL_NAME,
+        "model_name": args.model_name_or_path,
         "epoch": int(epoch),
         "validation_metrics": metrics,
         "threshold": float(args.threshold),
@@ -1057,7 +1071,9 @@ def dry_run_forward(
     criterion: nn.Module,
     device: torch.device,
 ) -> None:
-    sample = frame.iloc[: min(args.batch_size, 4)].copy()
+    # Preflight/dry-run uses the requested batch size so it can expose an OOM
+    # before a formal run. It still executes exactly one forward/backward step.
+    sample = frame.iloc[: min(args.batch_size, len(frame))].copy()
     loader = make_loader(sample, tokenizer, args.max_length, len(sample), False, 0, args.seed)
     batch = next(iter(loader))
     model.train()
@@ -1158,6 +1174,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         LOGGER.warning("=" * 72)
     set_seed(args.seed)
     device = select_device()
+    if args.require_cuda and device.type != "cuda":
+        raise RuntimeError(
+            "CUDA is required for this run, but torch.cuda.is_available() is False"
+        )
     LOGGER.info(
         "Environment | pooling=%s seed=%d device=%s torch=%s transformers=%s model=%s",
         args.pooling,
@@ -1165,7 +1185,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         device,
         torch.__version__,
         transformers.__version__,
-        MODEL_NAME,
+        args.model_name_or_path,
     )
 
     splits = load_splits(args.split_dir, args.evaluate_test)
@@ -1223,9 +1243,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         summaries = original_summaries
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     # These labels are ordinary text; tokenizer vocabulary and embeddings are unchanged.
-    model = build_model(MODEL_NAME, args.dropout, args.pooling)
+    model = build_model(args.model_name_or_path, args.dropout, args.pooling)
     model_limit = min(
         int(getattr(tokenizer, "model_max_length", args.max_length)),
         int(getattr(model.encoder.config, "max_position_embeddings", args.max_length)),
@@ -1236,6 +1256,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     model.to(device)
     parameter_info = parameter_report(model)
+    backbone_trainable_parameters = sum(
+        parameter.numel()
+        for parameter in model.encoder.parameters()
+        if parameter.requires_grad
+    )
+    backbone_frozen = backbone_trainable_parameters == 0
+    if not backbone_frozen:
+        raise RuntimeError(
+            f"Frozen-backbone invariant failed: {backbone_trainable_parameters} "
+            "encoder parameters are trainable"
+        )
     pos_weight_value, _, _ = compute_pos_weight(splits["train"])
     if smoke_test:
         LOGGER.warning("Smoke train positive: %d", summaries["train"]["positive"])
@@ -1314,12 +1345,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         "smoke_test": smoke_test,
         "max_train_samples": args.max_train_samples,
         "max_validation_samples": args.max_validation_samples,
-        "model_name": MODEL_NAME,
+        "model_name_or_path": args.model_name_or_path,
+        "tokenizer_name_or_path": args.model_name_or_path,
         "training_strategy": "classifier_head_only",
         "pooling": args.pooling,
         "pooling_output_dim": model.pooling_output_dim,
         "attention_pooling_trainable": model.attention_scorer is not None,
         "trainable_parameters": parameter_info["trainable_parameters"],
+        "frozen_parameters": parameter_info["frozen_parameters"],
+        "backbone_frozen": backbone_frozen,
+        "backbone_trainable_parameters": backbone_trainable_parameters,
+        "optimizer": {"name": "AdamW", "learning_rate": args.learning_rate},
+        "scheduler": None,
+        "gradient_clipping": None,
         "loss": "weighted_BCEWithLogitsLoss",
         "pos_weight": pos_weight_value,
         "criteria_sheet": criteria_schema.sheet_name,
@@ -1332,6 +1370,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         "data_qc": summaries,
         "original_data_qc": original_summaries if smoke_test else None,
         "truncation_qc": truncation,
+        "test_evaluated": bool(args.evaluate_test),
+        "environment": {
+            "device": str(device),
+            "gpu_name": torch.cuda.get_device_name(0) if device.type == "cuda" else None,
+            "pytorch_version": torch.__version__,
+            "cuda_version": torch.version.cuda,
+            "transformers_version": transformers.__version__,
+        },
     }
     (run_dir / "config.json").write_text(
         json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8"
@@ -1451,7 +1497,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise RuntimeError("Encoder freeze invariant was violated during smoke test")
 
     summary: dict[str, Any] = {
-        "model": MODEL_NAME,
+        "model": args.model_name_or_path,
         "smoke_test": smoke_test,
         "max_train_samples": args.max_train_samples,
         "max_validation_samples": args.max_validation_samples,
@@ -1460,6 +1506,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "pooling_output_dim": model.pooling_output_dim,
         "attention_pooling_trainable": model.attention_scorer is not None,
         "trainable_parameters": parameter_info["trainable_parameters"],
+        "frozen_parameters": parameter_info["frozen_parameters"],
+        "backbone_frozen": backbone_frozen,
+        "backbone_trainable_parameters": backbone_trainable_parameters,
         "loss": "weighted_BCEWithLogitsLoss",
         "pos_weight": pos_weight_value,
         "learning_rate": args.learning_rate,
