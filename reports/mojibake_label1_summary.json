@@ -1,0 +1,28 @@
+{
+  "candidate_records": 64,
+  "candidate_field_rows": 65,
+  "auto_repaired_records": 57,
+  "manual_review_records": 6,
+  "valid_unicode_preserved_records": 1,
+  "auto_repaired_occurrences": 105,
+  "manual_review_occurrences": 11,
+  "suspicious_patterns": {
+    "â": 2,
+    "�": 117
+  },
+  "affected_fields": {
+    "abstract": 64,
+    "title": 1
+  },
+  "records_by_review": {
+    "Leenaars_2020": 62,
+    "Hall_2012": 1,
+    "Walker_2018": 1
+  },
+  "raw_files_unchanged": true,
+  "pubmed_cache_sha256": "678df7eae3f6b584a4f38690f4b3dcb82acd49b6c9b4d5e19f6302b6c12d9e39",
+  "candidates_path": "C:\\Users\\86150\\Desktop\\论文代码\\reports\\mojibake_label1_candidates.csv",
+  "repairs_path": "C:\\Users\\86150\\Desktop\\论文代码\\reports\\mojibake_label1_repairs.csv",
+  "manual_review_path": "C:\\Users\\86150\\Desktop\\论文代码\\reports\\mojibake_label1_manual_review.csv",
+  "cleaned_preview_path": "C:\\Users\\86150\\Desktop\\论文代码\\data\\processed\\label1_mojibake_cleaned_preview.csv"
+}

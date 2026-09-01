@@ -1,0 +1,24 @@
+{
+  "total_rows_scanned": 169277,
+  "label_1_rows": 2833,
+  "mojibake_occurrences_detected": 1816,
+  "records_with_mojibake": 702,
+  "auto_repaired_occurrences": 1,
+  "auto_repaired_records": 1,
+  "auto_repaired_label_1_records": 0,
+  "manual_review_occurrences": 1815,
+  "manual_review_records": 701,
+  "manual_review_label_1_records": 64,
+  "remaining_suspicious_patterns": {
+    "Â": 13,
+    "Ã": 4,
+    "â": 120,
+    "â‚¬": 10,
+    "â„¢": 8,
+    "�": 1660
+  },
+  "raw_files_unchanged": true,
+  "cleaned_directory": "C:\\Users\\86150\\Desktop\\论文代码\\data\\processed",
+  "repair_log": "C:\\Users\\86150\\Desktop\\论文代码\\reports\\mojibake_repairs.csv",
+  "generation_note": "Generated with src/mojibake_qc.py rules using the standard-library CSV parser; local pandas is binary-incompatible with numpy."
+}
