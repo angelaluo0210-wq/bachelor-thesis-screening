@@ -91,10 +91,10 @@ already reduced to 16, use 16 here from the start.
 
 ## STEP 8 — Run the four-pooling comparison
 
-Replace `5e-4` below with the LR selected manually in STEP 6:
+The shared learning rate selected in Stage 1 is fixed at `1e-4`:
 
 ```powershell
-.\run_pooling_comparison.bat --learning-rate 5e-4 --batch-size 32 --output-root C:\thesis\results\pooling_comparison --model-name-or-path C:\thesis\models\pubmedbert
+.\run_pooling_comparison.bat --learning-rate 1e-4 --batch-size 32 --output-root C:\thesis\results\pooling_comparison --model-name-or-path C:\thesis\models\pubmedbert
 ```
 
 The runner executes `cls`, `mean`, `attention`, and `concat` sequentially. It
@@ -115,8 +115,10 @@ C:\thesis\results\pooling_comparison\
 ```
 
 Every completed run contains `config.json`, `training_history.csv`,
-`run_summary.json`, `run.log`, `best_f1_classifier_head.pt`,
-`best_recall_classifier_head.pt`, and `validation_predictions.csv`.
+`run_summary.json`, `run.log`, `best_pr_auc_classifier_head.pt`,
+`metrics.json`, `per_review_validation_metrics.csv`, and
+`validation_predictions.csv`. The comparison root also contains
+`final_comparison.csv`, sorted by validation PR-AUC in descending order.
 The first comparison writes `pooling_comparison_manifest.json`; a repeated
 comparison in the same root writes a timestamp-suffixed manifest instead of
 overwriting the earlier one.
@@ -125,8 +127,9 @@ overwriting the earlier one.
 
 Copy the complete Stage 1 and Stage 2 result roots back to the local computer.
 At minimum retain all manifests, configs, histories, summaries, logs,
-checkpoint files and validation predictions. The head-only checkpoints are
-small, so both best-F1 and best-Recall versions should be backed up.
+checkpoint files, per-review metrics, and validation predictions. Checkpoints
+are selected only by maximum validation PR-AUC; threshold-0.5 metrics remain
+diagnostics in the history and metadata.
 
 ## Failure recovery
 

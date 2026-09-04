@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import subprocess
 import sys
@@ -20,6 +21,25 @@ EXPECTED_TRAINABLE_PARAMETERS = {
     "attention": 1537,
     "concat": 2305,
 }
+SHARED_CONFIG_KEYS = (
+    "model_name_or_path",
+    "tokenizer_name_or_path",
+    "learning_rate",
+    "batch_size",
+    "epochs",
+    "dropout",
+    "seed",
+    "max_length",
+    "threshold",
+    "optimizer",
+    "scheduler",
+    "gradient_clipping",
+    "loss",
+    "pos_weight",
+    "split_dir",
+    "criteria_path",
+    "checkpoint_selection_metric",
+)
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -27,7 +47,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--learning-rate",
-        required=True,
+        default="1e-4",
         help="Shared LR selected manually from Stage 1 validation results.",
     )
     parser.add_argument(
@@ -135,6 +155,7 @@ def main() -> int:
             "pooling strategy and its necessarily different classifier-side "
             "parameterization only"
         ),
+        "checkpoint_selection_metric": "validation_pr_auc",
     }
     write_manifest(manifest_path, manifest)
 
@@ -147,6 +168,7 @@ def main() -> int:
 
     trainer = ROOT / "src" / "train_classifier_head.py"
     observed_pos_weight: float | None = None
+    reference_shared_config: dict[str, Any] | None = None
     for pooling in POOLING_STRATEGIES:
         pooling_root = args.output_root / pooling
         existing_configs = set(pooling_root.rglob("config.json")) if pooling_root.exists() else set()
@@ -203,6 +225,21 @@ def main() -> int:
                 f"expected {EXPECTED_TRAINABLE_PARAMETERS[pooling]}, "
                 f"found {config['trainable_parameters']}"
             )
+        current_shared_config = {key: config[key] for key in SHARED_CONFIG_KEYS}
+        if reference_shared_config is None:
+            reference_shared_config = current_shared_config
+        elif current_shared_config != reference_shared_config:
+            differences = {
+                key: {
+                    "expected": reference_shared_config[key],
+                    "observed": current_shared_config[key],
+                }
+                for key in SHARED_CONFIG_KEYS
+                if current_shared_config[key] != reference_shared_config[key]
+            }
+            raise RuntimeError(
+                f"Shared training configuration differs for pooling={pooling}: {differences}"
+            )
 
         pos_weight = float(config["pos_weight"])
         if observed_pos_weight is None:
@@ -218,6 +255,7 @@ def main() -> int:
         manifest["runs"][pooling] = {
             "run_directory": str(config_path.parent.resolve()),
             "config_path": str(config_path.resolve()),
+            "summary_path": str((config_path.parent / "run_summary.json").resolve()),
             "trainable_parameters": config["trainable_parameters"],
             "frozen_parameters": config["frozen_parameters"],
             "backbone_trainable_parameters": 0,
@@ -226,6 +264,32 @@ def main() -> int:
         write_manifest(manifest_path, manifest)
         print(f">>> COMPLETED pooling={pooling}", flush=True)
 
+    comparison_rows: list[dict[str, Any]] = []
+    for pooling in POOLING_STRATEGIES:
+        summary_path = Path(manifest["runs"][pooling]["summary_path"])
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        metrics = summary["best_checkpoint_metrics"]
+        comparison_rows.append(
+            {
+                "Pooling": pooling.upper() if pooling == "cls" else pooling.title(),
+                "Best Epoch": summary["best_pr_auc_epoch"],
+                "PR-AUC": metrics["pr_auc"],
+                "ROC-AUC": metrics["roc_auc"],
+                "Recall": metrics["recall"],
+                "FNR": metrics["fnr"],
+                "Precision": metrics["precision"],
+                "F1": metrics["f1"],
+            }
+        )
+    comparison_rows.sort(key=lambda row: row["PR-AUC"], reverse=True)
+    comparison_csv = args.output_root / "final_comparison.csv"
+    with comparison_csv.open("w", newline="", encoding="utf-8-sig") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(comparison_rows[0]))
+        writer.writeheader()
+        writer.writerows(comparison_rows)
+    manifest["final_comparison_path"] = str(comparison_csv.resolve())
+    manifest["final_comparison_sorted_by"] = "validation_pr_auc_descending"
+    manifest["final_comparison"] = comparison_rows
     manifest["status"] = "completed"
     manifest["completed_utc"] = datetime.now(timezone.utc).isoformat()
     write_manifest(manifest_path, manifest)

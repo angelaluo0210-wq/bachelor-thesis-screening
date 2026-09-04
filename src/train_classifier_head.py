@@ -46,7 +46,7 @@ LOGGER = logging.getLogger("train_classifier_head")
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--learning-rate", type=float, default=1e-3)
+    parser.add_argument("--learning-rate", type=float, default=1e-4)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--max-length", type=int, default=512)
@@ -886,7 +886,12 @@ def apply_threshold(probabilities: np.ndarray, threshold: float = 0.5) -> np.nda
     return (probabilities >= threshold).astype(np.int64)
 
 
-def calculate_metrics(labels: np.ndarray, probabilities: np.ndarray, threshold: float) -> dict[str, Any]:
+def calculate_metrics(
+    labels: np.ndarray,
+    probabilities: np.ndarray,
+    threshold: float,
+    context: str = "evaluation",
+) -> dict[str, Any]:
     predictions = apply_threshold(probabilities, threshold)
     labels = labels.astype(np.int64)
     tp = int(((labels == 1) & (predictions == 1)).sum())
@@ -894,11 +899,15 @@ def calculate_metrics(labels: np.ndarray, probabilities: np.ndarray, threshold: 
     fp = int(((labels == 0) & (predictions == 1)).sum())
     fn = int(((labels == 1) & (predictions == 0)).sum())
 
-    def divide(numerator: int, denominator: int) -> float:
-        return float(numerator / denominator) if denominator else 0.0
+    def divide(numerator: int, denominator: int, metric_name: str) -> float:
+        if denominator:
+            return float(numerator / denominator)
+        LOGGER.warning("%s %s is undefined; recording NaN", context, metric_name)
+        return float("nan")
 
-    recall = divide(tp, tp + fn)
-    precision = divide(tp, tp + fp)
+    recall = divide(tp, tp + fn, "Recall")
+    precision = divide(tp, tp + fp, "Precision")
+    f1_denominator = 2 * tp + fp + fn
     metrics: dict[str, Any] = {
         "tp": tp,
         "tn": tn,
@@ -906,20 +915,61 @@ def calculate_metrics(labels: np.ndarray, probabilities: np.ndarray, threshold: 
         "fn": fn,
         "recall": recall,
         "precision": precision,
-        "f1": divide(2 * precision * recall, precision + recall),
-        "fnr": divide(fn, fn + tp),
-        "specificity": divide(tn, tn + fp),
-        "accuracy": divide(tp + tn, len(labels)),
+        "f1": divide(2 * tp, f1_denominator, "F1"),
+        "fnr": divide(fn, fn + tp, "FNR"),
+        "specificity": divide(tn, tn + fp, "Specificity"),
+        "accuracy": divide(tp + tn, len(labels), "Accuracy"),
         "threshold": float(threshold),
-        "pr_auc": None,
-        "roc_auc": None,
+        "pr_auc": float("nan"),
+        "roc_auc": float("nan"),
     }
     if len(np.unique(labels)) == 2:
         metrics["pr_auc"] = float(average_precision_score(labels, probabilities))
         metrics["roc_auc"] = float(roc_auc_score(labels, probabilities))
     else:
-        LOGGER.warning("PR-AUC and ROC-AUC omitted because evaluation contains one class")
+        LOGGER.warning(
+            "%s PR-AUC and ROC-AUC are undefined because only one class is present; "
+            "recording NaN",
+            context,
+        )
     return metrics
+
+
+def calculate_per_review_metrics(
+    source: pd.DataFrame,
+    probabilities: np.ndarray,
+    labels: np.ndarray,
+    indices: np.ndarray,
+    threshold: float,
+) -> list[dict[str, Any]]:
+    """Calculate validation diagnostics separately for each review."""
+    aligned = pd.DataFrame(
+        {
+            "review_name": source.iloc[indices][REVIEW_COLUMN].astype(str).to_numpy(),
+            "true_label": labels,
+            "predicted_probability": probabilities,
+        }
+    )
+    results: list[dict[str, Any]] = []
+    for review_name, group in aligned.groupby("review_name", sort=True):
+        review_labels = group["true_label"].to_numpy(dtype=np.int64)
+        review_probabilities = group["predicted_probability"].to_numpy(dtype=float)
+        metrics = calculate_metrics(
+            review_labels,
+            review_probabilities,
+            threshold,
+            context=f"Validation review {review_name}",
+        )
+        results.append(
+            {
+                "review_name": review_name,
+                "n_samples": int(len(group)),
+                "n_positive": int((review_labels == 1).sum()),
+                "n_negative": int((review_labels == 0).sum()),
+                **metrics,
+            }
+        )
+    return results
 
 
 def evaluate(
@@ -1044,10 +1094,10 @@ def prediction_frame(
     columns = [REVIEW_COLUMN, TITLE_COLUMN]
     columns.extend(column for column in IDENTIFIER_COLUMNS if column in source.columns)
     output = source.iloc[indices][columns].reset_index(drop=True).copy()
-    output = output.rename(columns={REVIEW_COLUMN: "review_id"})
-    output["label"] = labels
-    output["probability"] = probabilities
-    output["prediction"] = apply_threshold(probabilities, threshold)
+    output = output.rename(columns={REVIEW_COLUMN: "review_name"})
+    output["true_label"] = labels
+    output["predicted_probability"] = probabilities
+    output["predicted_label"] = apply_threshold(probabilities, threshold)
     return output
 
 
@@ -1360,6 +1410,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "gradient_clipping": None,
         "loss": "weighted_BCEWithLogitsLoss",
         "pos_weight": pos_weight_value,
+        "checkpoint_selection_metric": "validation_pr_auc",
         "criteria_sheet": criteria_schema.sheet_name,
         "criteria_review_key_column": criteria_schema.review_key,
         "criteria_inclusion_column": criteria_schema.inclusion,
@@ -1407,10 +1458,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     history: list[dict[str, Any]] = []
-    best_f1 = -1.0
-    best_recall = -1.0
-    best_f1_epoch = 0
-    best_recall_epoch = 0
+    best_pr_auc = -float("inf")
+    best_pr_auc_epoch = 0
+    best_checkpoint_metrics: dict[str, Any] | None = None
+    best_per_review_metrics: list[dict[str, Any]] | None = None
     for epoch in range(1, args.epochs + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device, epoch)
         validation_loss, metrics, probabilities, labels, indices = evaluate(
@@ -1425,32 +1476,39 @@ def main(argv: Sequence[str] | None = None) -> int:
         history.append(row)
         LOGGER.info("Epoch %d | %s", epoch, json.dumps(row))
 
-        if metrics["f1"] > best_f1:
-            best_f1 = float(metrics["f1"])
-            best_f1_epoch = epoch
+        current_pr_auc = float(metrics["pr_auc"])
+        if not np.isnan(current_pr_auc) and current_pr_auc > best_pr_auc:
+            best_pr_auc = current_pr_auc
+            best_pr_auc_epoch = epoch
+            checkpoint_metrics = {**metrics, "validation_loss": validation_loss}
+            best_checkpoint_metrics = checkpoint_metrics
             save_checkpoint(
-                run_dir / "best_f1_classifier_head.pt",
+                run_dir / "best_pr_auc_classifier_head.pt",
                 model,
                 args,
                 epoch,
-                metrics,
+                checkpoint_metrics,
                 pos_weight_value,
             )
             best_predictions = prediction_frame(
                 splits["validation"], probabilities, labels, indices, args.threshold
             )
             best_predictions.to_csv(run_dir / "validation_predictions.csv", index=False)
-
-        if metrics["recall"] > best_recall:
-            best_recall = float(metrics["recall"])
-            best_recall_epoch = epoch
-            save_checkpoint(
-                run_dir / "best_recall_classifier_head.pt",
-                model,
-                args,
-                epoch,
-                metrics,
-                pos_weight_value,
+            best_per_review_metrics = calculate_per_review_metrics(
+                splits["validation"], probabilities, labels, indices, args.threshold
+            )
+            pd.DataFrame(best_per_review_metrics).to_csv(
+                run_dir / "per_review_validation_metrics.csv", index=False
+            )
+            best_artifacts = {
+                "pooling": args.pooling,
+                "best_epoch": epoch,
+                "selection_metric": "validation_pr_auc",
+                "overall_validation": checkpoint_metrics,
+                "per_review_validation": best_per_review_metrics,
+            }
+            (run_dir / "metrics.json").write_text(
+                json.dumps(best_artifacts, ensure_ascii=False, indent=2), encoding="utf-8"
             )
 
         pd.DataFrame(history).to_csv(run_dir / "training_history.csv", index=False)
@@ -1496,6 +1554,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not parameter_update_check["encoder_frozen"]:
             raise RuntimeError("Encoder freeze invariant was violated during smoke test")
 
+    if best_checkpoint_metrics is None or best_per_review_metrics is None:
+        raise RuntimeError("No best checkpoint was selected because validation PR-AUC was NaN")
+    LOGGER.info(
+        "Best checkpoint summary | pooling=%s epoch=%d selection=validation_pr_auc metrics=%s",
+        args.pooling,
+        best_pr_auc_epoch,
+        json.dumps(best_checkpoint_metrics),
+    )
+    for review_metrics in best_per_review_metrics:
+        LOGGER.info(
+            "Per-review validation | %s",
+            json.dumps(review_metrics, ensure_ascii=False),
+        )
+
     summary: dict[str, Any] = {
         "model": args.model_name_or_path,
         "smoke_test": smoke_test,
@@ -1519,18 +1591,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         "threshold": args.threshold,
         "train_rows": len(splits["train"]),
         "validation_rows": len(splits["validation"]),
-        "best_f1_epoch": best_f1_epoch,
-        "best_validation_f1": best_f1,
-        "best_recall_epoch": best_recall_epoch,
-        "best_validation_recall": best_recall,
+        "checkpoint_selection_metric": "validation_pr_auc",
+        "best_pr_auc_epoch": best_pr_auc_epoch,
+        "best_validation_pr_auc": best_pr_auc,
+        "best_checkpoint_path": str(run_dir / "best_pr_auc_classifier_head.pt"),
+        "best_checkpoint_metrics": best_checkpoint_metrics,
+        "per_review_validation": best_per_review_metrics,
         "test_evaluated": bool(args.evaluate_test),
         "parameter_update_check": parameter_update_check,
     }
 
     if args.evaluate_test:
-        # This occurs after selection is complete and always uses the best-F1 checkpoint.
+        # This occurs after selection is complete and always uses the best-PR-AUC checkpoint.
         model, _ = load_classifier_checkpoint(
-            run_dir / "best_f1_classifier_head.pt", device
+            run_dir / "best_pr_auc_classifier_head.pt", device
         )
         test_loader = make_loader(
             splits["test"], tokenizer, args.max_length, args.batch_size, False,
