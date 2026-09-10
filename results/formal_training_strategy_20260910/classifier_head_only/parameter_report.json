@@ -1,0 +1,18 @@
+{
+  "training_strategy": "classifier_head_only",
+  "total_parameters": 109483009,
+  "trainable_parameters": 769,
+  "frozen_parameters": 109482240,
+  "trainable_percentage": 0.0007023920944664574,
+  "trainable_parameter_names": [
+    "classifier.weight",
+    "classifier.bias"
+  ],
+  "pooling": "cls",
+  "pooling_output_dim": 768,
+  "classifier_parameters": 769,
+  "encoder_trainable_parameters": 0,
+  "adapter_parameters": 0,
+  "adapted_layer_indices": [],
+  "lora_target_modules": []
+}

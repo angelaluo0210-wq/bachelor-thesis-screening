@@ -1,0 +1,149 @@
+{
+  "learning_rate": 0.0001,
+  "training_strategy": "classifier_head_only",
+  "head_learning_rate": 0.0001,
+  "backbone_learning_rate": 1e-05,
+  "adapter_learning_rate": 5e-05,
+  "unfreeze_last_n": 2,
+  "lora_r": 8,
+  "lora_alpha": 16,
+  "lora_dropout": 0.05,
+  "lora_target_modules": [
+    "query",
+    "value"
+  ],
+  "comparison_mode": true,
+  "batch_size": 32,
+  "epochs": 5,
+  "max_length": 512,
+  "dropout": 0.1,
+  "seed": 42,
+  "num_workers": 0,
+  "output_dir": "outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/classifier_head_only/head_lr_1e-4",
+  "split_dir": "/root/bachelor-thesis-screening/data/processed/splits",
+  "criteria_path": "/root/bachelor-thesis-screening/data/eligibility_criteria(排纳标准).xlsx",
+  "threshold": 0.5,
+  "model_name_or_path": "/root/bachelor-thesis-screening/models/pubmedbert",
+  "require_cuda": true,
+  "pooling": "cls",
+  "evaluate_test": false,
+  "dry_run": false,
+  "max_train_samples": null,
+  "max_validation_samples": null,
+  "smoke_test": false,
+  "tokenizer_name_or_path": "/root/bachelor-thesis-screening/models/pubmedbert",
+  "pooling_output_dim": 768,
+  "attention_pooling_trainable": false,
+  "trainable_parameters": 769,
+  "frozen_parameters": 109482240,
+  "backbone_frozen": true,
+  "backbone_trainable_parameters": 0,
+  "optimizer": {
+    "name": "AdamW",
+    "weight_decay": 0.01,
+    "learning_rate": 0.0001,
+    "parameter_groups": [
+      {
+        "name": "classifier",
+        "lr": 0.0001,
+        "weight_decay": 0.01,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "parameters": 769
+      }
+    ]
+  },
+  "warmup": null,
+  "gradient_accumulation_steps": 1,
+  "effective_batch_size": 32,
+  "scheduler": null,
+  "gradient_clipping": null,
+  "loss": "weighted_BCEWithLogitsLoss",
+  "pos_weight": 62.38868894601542,
+  "checkpoint_selection_metric": "validation_pr_auc",
+  "criteria_sheet": "Eligibility criteria",
+  "criteria_review_key_column": "review_key",
+  "criteria_inclusion_column": "inclusion_criteria",
+  "criteria_exclusion_column": "exclusion_criteria",
+  "criteria_eligibility_column": "eligibility_criteria",
+  "review_text_columns": [],
+  "parameter_report": {
+    "training_strategy": "classifier_head_only",
+    "total_parameters": 109483009,
+    "trainable_parameters": 769,
+    "frozen_parameters": 109482240,
+    "trainable_percentage": 0.0007023920944664574,
+    "trainable_parameter_names": [
+      "classifier.weight",
+      "classifier.bias"
+    ],
+    "pooling": "cls",
+    "pooling_output_dim": 768,
+    "classifier_parameters": 769,
+    "encoder_trainable_parameters": 0,
+    "adapter_parameters": 0,
+    "adapted_layer_indices": [],
+    "lora_target_modules": []
+  },
+  "data_qc": {
+    "train": {
+      "split": "train",
+      "reviews": 18,
+      "rows": 123291,
+      "positive": 1945,
+      "negative": 121346,
+      "positive_rate": 0.015775685167611585,
+      "missing_title": 239,
+      "missing_abstract": 11331,
+      "missing_abstract_positive": 120,
+      "missing_abstract_negative": 11211
+    },
+    "validation": {
+      "split": "validation",
+      "reviews": 4,
+      "rows": 22397,
+      "positive": 414,
+      "negative": 21983,
+      "positive_rate": 0.01848461847568871,
+      "missing_title": 17,
+      "missing_abstract": 1650,
+      "missing_abstract_positive": 25,
+      "missing_abstract_negative": 1625
+    }
+  },
+  "original_data_qc": null,
+  "truncation_qc": {
+    "train": {
+      "examples": 123291,
+      "exceeding_max_length": 77025,
+      "percentage_exceeding": 62.47414653137699,
+      "max_observed_tokens": 17155
+    },
+    "validation": {
+      "examples": 22397,
+      "exceeding_max_length": 7156,
+      "percentage_exceeding": 31.95070768406483,
+      "max_observed_tokens": 4751
+    }
+  },
+  "test_evaluated": false,
+  "environment": {
+    "packages": {
+      "torch": "2.6.0+cu124",
+      "transformers": "5.16.1",
+      "peft": "0.20.0",
+      "accelerate": "1.15.0",
+      "numpy": "2.1.3",
+      "scikit-learn": "1.9.0"
+    },
+    "device": "cuda",
+    "gpu_name": "NVIDIA GeForce RTX 4080 SUPER",
+    "pytorch_version": "2.6.0+cu124",
+    "cuda_version": "12.4",
+    "transformers_version": "5.16.1",
+    "model_revision": null
+  }
+}
