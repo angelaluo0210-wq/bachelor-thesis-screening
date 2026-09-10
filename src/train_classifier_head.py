@@ -1073,6 +1073,7 @@ def calculate_metrics(
     recall = divide(tp, tp + fn, "Recall")
     precision = divide(tp, tp + fp, "Precision")
     f1_denominator = 2 * tp + fp + fn
+    predicted_include_rate = divide(tp + fp, len(labels), "Predicted include rate")
     metrics: dict[str, Any] = {
         "tp": tp,
         "tn": tn,
@@ -1083,6 +1084,9 @@ def calculate_metrics(
         "f1": divide(2 * tp, f1_denominator, "F1"),
         "fnr": divide(fn, fn + tp, "FNR"),
         "specificity": divide(tn, tn + fp, "Specificity"),
+        "npv": divide(tn, tn + fn, "NPV"),
+        "predicted_include_rate": predicted_include_rate,
+        "workload_reduction": 1.0 - predicted_include_rate,
         "accuracy": divide(tp + tn, len(labels), "Accuracy"),
         "threshold": float(threshold),
         "pr_auc": float("nan"),
@@ -1106,8 +1110,9 @@ def calculate_per_review_metrics(
     labels: np.ndarray,
     indices: np.ndarray,
     threshold: float,
+    context_name: str = "Validation",
 ) -> list[dict[str, Any]]:
-    """Calculate validation diagnostics separately for each review."""
+    """Calculate threshold diagnostics separately for each review."""
     aligned = pd.DataFrame(
         {
             "review_name": source.iloc[indices][REVIEW_COLUMN].astype(str).to_numpy(),
@@ -1123,7 +1128,7 @@ def calculate_per_review_metrics(
             review_labels,
             review_probabilities,
             threshold,
-            context=f"Validation review {review_name}",
+            context=f"{context_name} review {review_name}",
         )
         results.append(
             {
