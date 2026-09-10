@@ -1,5 +1,6 @@
 {
-  "train": [],
-  "validation": [],
-  "test": []
+  "status": "deprecated_empty_placeholder",
+  "canonical_replacement": "config/canonical_split.json",
+  "source_of_truth": "src/split_dataset.py:SPLIT_REVIEWS",
+  "note": "Do not use this file to assign reviews in formal experiments."
 }

@@ -1,0 +1,104 @@
+{
+  "verified_utc": "2026-09-09T16:10:35.138350+00:00",
+  "status": "passed",
+  "original_files_preserved_and_verified": 42,
+  "previous_output_files_unchanged": 229,
+  "runs": {
+    "cls": {
+      "run_directory": "cls/run_20260905_123026",
+      "best_epoch": 1,
+      "validation_rows": 22397,
+      "metrics": {
+        "tp": 242,
+        "tn": 13939,
+        "fp": 8044,
+        "fn": 172,
+        "recall": 0.5845410628019324,
+        "precision": 0.02920588945208786,
+        "f1": 0.05563218390804598,
+        "fnr": 0.41545893719806765,
+        "specificity": 0.6340808806805258,
+        "accuracy": 0.633165156047685,
+        "threshold": 0.5,
+        "pr_auc": 0.09437487616018213,
+        "roc_auc": 0.6766961558569303,
+        "validation_loss": 1.3694925403048877
+      },
+      "checkpoint_tensor_load": "passed",
+      "validation_identity_matches_local_split": true
+    },
+    "mean": {
+      "run_directory": "mean/run_20260905_132403",
+      "best_epoch": 5,
+      "validation_rows": 22397,
+      "metrics": {
+        "tp": 280,
+        "tn": 10594,
+        "fp": 11389,
+        "fn": 134,
+        "recall": 0.6763285024154589,
+        "precision": 0.02399520095980804,
+        "f1": 0.046346106099478604,
+        "fnr": 0.32367149758454106,
+        "specificity": 0.4819178456079698,
+        "accuracy": 0.48551145242666427,
+        "threshold": 0.5,
+        "pr_auc": 0.0391426239235788,
+        "roc_auc": 0.6571500902871587,
+        "validation_loss": 1.5278766964244839
+      },
+      "checkpoint_tensor_load": "passed",
+      "validation_identity_matches_local_split": true
+    },
+    "attention": {
+      "run_directory": "attention/run_20260905_141749",
+      "best_epoch": 3,
+      "validation_rows": 22397,
+      "metrics": {
+        "tp": 172,
+        "tn": 17463,
+        "fp": 4520,
+        "fn": 242,
+        "recall": 0.41545893719806765,
+        "precision": 0.03665814151747655,
+        "f1": 0.06737171954563259,
+        "fnr": 0.5845410628019324,
+        "specificity": 0.7943865714415684,
+        "accuracy": 0.7873822386926821,
+        "threshold": 0.5,
+        "pr_auc": 0.03872045521046033,
+        "roc_auc": 0.6364988118838426,
+        "validation_loss": 1.6139663051892514
+      },
+      "checkpoint_tensor_load": "passed",
+      "validation_identity_matches_local_split": true
+    },
+    "concat": {
+      "run_directory": "concat/run_20260905_151150",
+      "best_epoch": 1,
+      "validation_rows": 22397,
+      "metrics": {
+        "tp": 237,
+        "tn": 16691,
+        "fp": 5292,
+        "fn": 177,
+        "recall": 0.572463768115942,
+        "precision": 0.04286489419424851,
+        "f1": 0.07975769813225643,
+        "fnr": 0.427536231884058,
+        "specificity": 0.7592685256789338,
+        "accuracy": 0.7558155110059382,
+        "threshold": 0.5,
+        "pr_auc": 0.09094131373324439,
+        "roc_auc": 0.7234961534835548,
+        "validation_loss": 1.3300911387175902
+      },
+      "checkpoint_tensor_load": "passed",
+      "validation_identity_matches_local_split": true
+    }
+  },
+  "existing_cls_baseline_loader": "passed",
+  "test_split_opened": false,
+  "full_encoder_inference": "not run; remote base weights/tokenizer not in download",
+  "data_identity_limit": "Validation row identities/labels match locally. Historical train contents, criteria and base-model identity lack remote hashes; counts/paths are not hashes."
+}

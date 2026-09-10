@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "status": "canonical_active_split",
+  "source_of_truth": "src/split_dataset.py:SPLIT_REVIEWS",
+  "active_split_directory": "data/processed/splits",
+  "historical_noncanonical_reports": [
+    "reports/proposed_review_split.csv"
+  ],
+  "review_membership": {
+    "train": [
+      "Appenzeller-Herzog_2019", "Bos_2018", "Brouwer_2019", "Chou_2003", "Chou_2004", "Donners_2021", "Jeyaraman_2020", "Leenaars_2020", "Meijboom_2021", "Menon_2022", "Nelson_2002", "Oud_2018", "Sep_2021", "Smid_2020", "van_de_Schoot_2018", "van_der_Waal_2022", "Walker_2018", "Wolters_2018"
+    ],
+    "validation": [
+      "Hall_2012", "Moran_2021", "van_der_Valk_2021", "Wassenaar_2017"
+    ],
+    "test": [
+      "Leenaars_2019", "Muthu_2021", "Radjenovic_2013", "van_Dis_2020"
+    ]
+  },
+  "invariants": {
+    "review_counts": {"train": 18, "validation": 4, "test": 4},
+    "review_sets_must_be_disjoint": true,
+    "test_is_sealed_during_strategy_comparison": true
+  }
+}

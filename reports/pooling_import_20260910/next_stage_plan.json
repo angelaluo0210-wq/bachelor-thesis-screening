@@ -1,0 +1,28 @@
+{
+  "execute": false,
+  "test_disabled": true,
+  "pooling": "cls",
+  "baseline": "outputs\\pooling_comparison\\formal\\20260905_122936\\cls\\run_20260905_123026\\run_summary.json",
+  "runs": [
+    {
+      "id": "backbone_lr_1e-5",
+      "strategy": "partial_unfreezing",
+      "backbone_lr": "1e-5"
+    },
+    {
+      "id": "backbone_lr_2e-5",
+      "strategy": "partial_unfreezing",
+      "backbone_lr": "2e-5"
+    },
+    {
+      "id": "adapter_lr_5e-5",
+      "strategy": "lora",
+      "adapter_lr": "5e-5"
+    },
+    {
+      "id": "adapter_lr_1e-4",
+      "strategy": "lora",
+      "adapter_lr": "1e-4"
+    }
+  ]
+}

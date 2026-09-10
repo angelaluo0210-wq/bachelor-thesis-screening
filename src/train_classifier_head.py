@@ -1,4 +1,4 @@
-"""Train a frozen-PubMedBERT classifier head for article screening.
+"""Train a PubMedBERT screening classifier with head-only, upper-layer or LoRA adaptation.
 
 The existing review-level splits are treated as immutable. During ordinary
 training only train.csv and validation.csv are opened. Pass ``--evaluate-test``
@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import random
+from importlib.metadata import version, PackageNotFoundError
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -47,6 +48,7 @@ LOGGER = logging.getLogger("train_classifier_head")
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--learning-rate", type=float, default=1e-4)
+    add_strategy_arguments(parser)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--max-length", type=int, default=512)
@@ -88,8 +90,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Deterministically stratify-sample validation rows for a smoke test.",
     )
     args = parser.parse_args(argv)
+    validate_strategy_args(args, parser)
 
-    if args.learning_rate <= 0 or args.batch_size <= 0 or args.epochs <= 0:
+    if not np.isfinite(args.learning_rate) or args.learning_rate <= 0 or args.batch_size <= 0 or args.epochs <= 0:
         parser.error("learning-rate, batch-size, and epochs must be positive")
     if args.max_length < 16:
         parser.error("max-length must be at least 16")
@@ -107,6 +110,51 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     if smoke_test and args.evaluate_test:
         parser.error("--evaluate-test cannot be used in smoke test mode")
     return args
+
+
+STRATEGIES = ("classifier_head_only", "partial_unfreezing", "lora")
+
+
+def add_strategy_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--training-strategy", choices=STRATEGIES, default=STRATEGIES[0])
+    parser.add_argument("--head-learning-rate", type=float, default=None,
+                        help="Defaults to --learning-rate, preserving legacy head-only runs.")
+    parser.add_argument("--backbone-learning-rate", type=float, default=1e-5)
+    parser.add_argument("--adapter-learning-rate", type=float, default=5e-5)
+    parser.add_argument("--unfreeze-last-n", type=int, default=2)
+    parser.add_argument("--lora-r", type=int, default=8)
+    parser.add_argument("--lora-alpha", type=int, default=16)
+    parser.add_argument("--lora-dropout", type=float, default=0.05)
+    parser.add_argument("--lora-target-modules", nargs="+", default=["query", "value"])
+    parser.add_argument("--comparison-mode", action="store_true",
+                        help="Enforce CLS/threshold=0.5 and prohibit test evaluation.")
+
+
+def validate_strategy_args(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
+    for name in ("head_learning_rate", "backbone_learning_rate", "adapter_learning_rate"):
+        value = getattr(args, name)
+        if value is not None and (not np.isfinite(value) or value <= 0):
+            parser.error(f"{name} must be finite and positive")
+    if args.unfreeze_last_n < 1 or args.lora_r < 1 or args.lora_alpha < 1:
+        parser.error("unfreeze-last-n, lora-r and lora-alpha must be positive")
+    if not 0 <= args.lora_dropout < 1:
+        parser.error("lora-dropout must be in [0, 1)")
+    if sorted(args.lora_target_modules) != ["query", "value"]:
+        parser.error("This experiment supports exactly query value LoRA targets")
+    if args.training_strategy != "classifier_head_only" and args.pooling != "cls":
+        parser.error("Partial unfreezing and LoRA require CLS pooling")
+    if args.comparison_mode:
+        if args.evaluate_test or args.pooling != "cls" or args.threshold != 0.5:
+            parser.error("Comparison requires CLS, threshold=0.5 and test disabled")
+        if (args.unfreeze_last_n, args.lora_r, args.lora_alpha, args.lora_dropout) != (2, 8, 16, 0.05):
+            parser.error("Comparison fixes last_n=2, r=8, alpha=16, LoRA dropout=0.05")
+
+
+def strategy_options(args: argparse.Namespace) -> dict[str, Any]:
+    return {name: getattr(args, name) for name in (
+        "training_strategy", "unfreeze_last_n", "lora_r", "lora_alpha",
+        "lora_dropout", "lora_target_modules",
+    )}
 
 
 def configure_logging(run_dir: Path | None = None) -> None:
@@ -671,17 +719,33 @@ def report_truncation(
 
 
 class FrozenPubMedBertClassifier(nn.Module):
-    """One frozen encoder with a selectable pooling strategy."""
+    """Legacy-compatible name; strategy-aware encoder plus unchanged pooling/head."""
 
     VALID_POOLING = {"cls", "mean", "attention", "concat"}
 
-    def __init__(self, model_name: str, dropout: float, pooling_type: str = "cls") -> None:
+    def __init__(self, model_name: str, dropout: float, pooling_type: str = "cls",
+                 training_strategy: str = "classifier_head_only", unfreeze_last_n: int = 2,
+                 lora_r: int = 8, lora_alpha: int = 16, lora_dropout: float = 0.05,
+                 lora_target_modules: Sequence[str] = ("query", "value"),
+                 model_revision: str | None = None) -> None:
         super().__init__()
         if pooling_type not in self.VALID_POOLING:
             raise ValueError(f"Unsupported pooling type: {pooling_type!r}")
         self.model_name = model_name
         self.pooling_type = pooling_type
-        self.encoder = AutoModel.from_pretrained(model_name)
+        if training_strategy not in STRATEGIES:
+            raise ValueError(f"Unsupported training strategy: {training_strategy}")
+        if training_strategy != STRATEGIES[0] and pooling_type != "cls":
+            raise ValueError("Encoder adaptation requires CLS pooling")
+        self.training_strategy = training_strategy
+        self.strategy_config = dict(training_strategy=training_strategy,
+                                    unfreeze_last_n=unfreeze_last_n, lora_r=lora_r,
+                                    lora_alpha=lora_alpha, lora_dropout=lora_dropout,
+                                    lora_target_modules=list(lora_target_modules))
+        self.adapted_layer_indices: list[int] = []
+        self.lora_module_names: list[str] = []
+        self.encoder = AutoModel.from_pretrained(model_name, **({"revision": model_revision} if model_revision else {}))
+        self.model_revision = getattr(self.encoder.config, "_commit_hash", None)
         self.freeze_encoder()
         self.hidden_size = int(self.encoder.config.hidden_size)
         self.pooling_output_dim = self.hidden_size * 3 if pooling_type == "concat" else self.hidden_size
@@ -695,6 +759,37 @@ class FrozenPubMedBertClassifier(nn.Module):
             if pooling_type == "attention"
             else None
         )
+        # Construct the head BEFORE injecting adapters: PEFT initialization must
+        # not change the head's random initialization relative to the legacy A.
+        if training_strategy == "partial_unfreezing":
+            layers = self.encoder.encoder.layer
+            if not 1 <= unfreeze_last_n <= len(layers):
+                raise ValueError("unfreeze_last_n exceeds the encoder layer count")
+            self.adapted_layer_indices = list(range(len(layers) - unfreeze_last_n, len(layers)))
+            for index in self.adapted_layer_indices:
+                layers[index].requires_grad_(True)
+        elif training_strategy == "lora":
+            if sorted(lora_target_modules) != ["query", "value"]:
+                raise ValueError("LoRA must target exactly query and value")
+            try:
+                from peft import LoraConfig, get_peft_model
+            except ImportError as error:
+                raise ImportError("LoRA requires the PEFT version in requirements.txt") from error
+            targets = [f"encoder.layer.{i}.attention.self.{name}"
+                       for i in range(len(self.encoder.encoder.layer))
+                       for name in ("query", "value")]
+            modules = dict(self.encoder.named_modules())
+            if not all(isinstance(modules.get(name), nn.Linear) for name in targets):
+                raise ValueError("Expected BERT attention query/value Linear modules")
+            self.encoder = get_peft_model(self.encoder, LoraConfig(
+                r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout,
+                target_modules=targets, bias="none",
+            ))
+            self.lora_module_names = [name for name, module in self.encoder.named_modules()
+                                      if hasattr(module, "lora_A")]
+            if len(self.lora_module_names) != len(targets):
+                raise RuntimeError("Unexpected LoRA target count")
+        self.train(self.training)
 
     def freeze_encoder(self) -> None:
         for parameter in self.encoder.parameters():
@@ -703,8 +798,16 @@ class FrozenPubMedBertClassifier(nn.Module):
 
     def train(self, mode: bool = True) -> "FrozenPubMedBertClassifier":
         super().train(mode)
-        # Frozen encoder dropout must stay disabled; only head dropout is trained.
+        # Start with every frozen native dropout disabled. Enable only the
+        # trainable blocks (B) or adapter dropout (C), never the frozen base.
         self.encoder.eval()
+        if mode and self.training_strategy == "partial_unfreezing":
+            for index in self.adapted_layer_indices:
+                self.encoder.encoder.layer[index].train(True)
+        elif mode and self.training_strategy == "lora":
+            for module in self.encoder.modules():
+                if hasattr(module, "lora_dropout"):
+                    module.lora_dropout.train(True)
         return self
 
     @staticmethod
@@ -780,11 +883,13 @@ def build_model(
     model_name: str,
     dropout: float,
     pooling_type: str = "cls",
+    **strategy_kwargs: Any,
 ) -> FrozenPubMedBertClassifier:
     return FrozenPubMedBertClassifier(
         model_name=model_name,
         dropout=dropout,
         pooling_type=pooling_type,
+        **strategy_kwargs,
     )
 
 
@@ -796,9 +901,19 @@ def parameter_report(model: nn.Module) -> dict[str, Any]:
     expected_names = {"classifier.weight", "classifier.bias"}
     if isinstance(model, FrozenPubMedBertClassifier) and model.pooling_type == "attention":
         expected_names.add("attention_scorer.weight")
+    strategy = getattr(model, "training_strategy", "classifier_head_only")
+    if strategy == "partial_unfreezing":
+        for index in model.adapted_layer_indices:
+            expected_names.update(f"encoder.encoder.layer.{index}.{name}"
+                                  for name, _ in model.encoder.encoder.layer[index].named_parameters())
+    elif strategy == "lora":
+        expected_names.update(f"encoder.{module}.{matrix}.default.weight"
+                              for module in model.lora_module_names
+                              for matrix in ("lora_A", "lora_B"))
     if set(names) != expected_names:
         raise RuntimeError(f"Unexpected trainable parameters: {names}")
     report = {
+        "training_strategy": strategy,
         "total_parameters": total,
         "trainable_parameters": trainable,
         "frozen_parameters": frozen,
@@ -806,9 +921,59 @@ def parameter_report(model: nn.Module) -> dict[str, Any]:
         "trainable_parameter_names": names,
         "pooling": getattr(model, "pooling_type", None),
         "pooling_output_dim": getattr(model, "pooling_output_dim", None),
+        "classifier_parameters": sum(p.numel() for p in model.classifier.parameters()),
+        "encoder_trainable_parameters": sum(p.numel() for p in model.encoder.parameters() if p.requires_grad),
+        "adapter_parameters": sum(p.numel() for name, p in model.named_parameters()
+                                  if ".lora_A." in name or ".lora_B." in name),
+        "adapted_layer_indices": getattr(model, "adapted_layer_indices", []),
+        "lora_target_modules": getattr(model, "lora_module_names", []),
     }
     LOGGER.info("Parameter report | %s", json.dumps(report))
     return report
+
+
+def build_optimizer(model: FrozenPubMedBertClassifier, args: argparse.Namespace) -> AdamW:
+    parameter_report(model)
+    head_lr = args.head_learning_rate if args.head_learning_rate is not None else args.learning_rate
+    if model.training_strategy == "classifier_head_only":
+        # Same parameter order, defaults and decay policy as the historical A.
+        optimizer = AdamW([p for p in model.parameters() if p.requires_grad],
+                          lr=head_lr, weight_decay=0.01)
+    else:
+        encoder_lr = (args.backbone_learning_rate if model.training_strategy == "partial_unfreezing"
+                      else args.adapter_learning_rate)
+        optimizer = AdamW([
+            {"params": list(model.classifier.parameters()), "lr": head_lr, "name": "classifier"},
+            {"params": [p for p in model.encoder.parameters() if p.requires_grad],
+             "lr": encoder_lr, "name": "backbone" if model.training_strategy == "partial_unfreezing" else "adapter"},
+        ], lr=head_lr, weight_decay=0.01)
+    actual = [id(p) for group in optimizer.param_groups for p in group["params"]]
+    expected = {id(p) for p in model.parameters() if p.requires_grad}
+    if len(actual) != len(set(actual)) or set(actual) != expected:
+        raise RuntimeError("Optimizer must contain each trainable parameter exactly once")
+    return optimizer
+
+
+def optimizer_report(optimizer: AdamW) -> dict[str, Any]:
+    return {"name": "AdamW", "weight_decay": 0.01, "learning_rate": optimizer.param_groups[0]["lr"],
+            "parameter_groups": [{"name": group.get("name", "classifier"), "lr": group["lr"],
+                                  "weight_decay": group["weight_decay"], "betas": list(group["betas"]),
+                                  "eps": group["eps"], "parameters": sum(p.numel() for p in group["params"])}
+                                 for group in optimizer.param_groups]}
+
+
+def package_versions() -> dict[str, str | None]:
+    result = {}
+    for name in ("torch", "transformers", "peft", "accelerate", "numpy", "scikit-learn"):
+        try:
+            result[name] = version(name)
+        except PackageNotFoundError:
+            result[name] = None
+    return result
+
+
+def is_better_checkpoint(current_ap: float, best_ap: float) -> bool:
+    return not np.isnan(current_ap) and current_ap > best_ap
 
 
 def compute_pos_weight(train_frame: pd.DataFrame) -> tuple[float, int, int]:
@@ -1031,6 +1196,10 @@ def save_checkpoint(
     pos_weight: float,
 ) -> None:
     checkpoint = {
+        "checkpoint_version": 2,
+        "training_strategy": model.training_strategy,
+        "strategy_config": model.strategy_config,
+        "parameter_report": parameter_report(model),
         "classifier_head_state_dict": {
             key: value.detach().cpu() for key, value in model.classifier.state_dict().items()
         },
@@ -1052,12 +1221,27 @@ def save_checkpoint(
         },
         "training_arguments": serializable_args(args),
         "model_name": args.model_name_or_path,
+        "model_revision": model.model_revision,
+        "optimizer": optimizer_report(build_optimizer(model, args)),
         "epoch": int(epoch),
         "validation_metrics": metrics,
         "threshold": float(args.threshold),
         "pos_weight": float(pos_weight),
         "seed": int(args.seed),
     }
+    if model.training_strategy == "partial_unfreezing":
+        checkpoint["upper_encoder_state_dicts"] = {
+            str(index): {name: value.detach().cpu()
+                         for name, value in model.encoder.encoder.layer[index].state_dict().items()}
+            for index in model.adapted_layer_indices
+        }
+    elif model.training_strategy == "lora":
+        from peft import get_peft_model_state_dict
+        checkpoint["adapter_config"] = json.loads(json.dumps(
+            model.encoder.peft_config["default"].to_dict(), default=lambda value: sorted(value)))
+        checkpoint["adapter_state_dict"] = {
+            name: value.detach().cpu() for name, value in get_peft_model_state_dict(model.encoder).items()
+        }
     torch.save(checkpoint, path)
 
 
@@ -1066,21 +1250,46 @@ def load_classifier_checkpoint(
     device: torch.device,
 ) -> tuple[FrozenPubMedBertClassifier, dict[str, Any]]:
     """Recreate the frozen encoder and restore the compact classifier head."""
-    checkpoint = torch.load(path, map_location="cpu")
+    checkpoint = torch.load(path, map_location="cpu", weights_only=True)
     pooling_type = str(checkpoint["model_config"].get("pooling", "cls")).lower()
     model = build_model(
         checkpoint["model_name"],
         checkpoint["model_config"]["dropout"],
         pooling_type,
+        model_revision=checkpoint.get("model_revision"),
+        **checkpoint.get("strategy_config", {}),
     )
+    if checkpoint.get("training_strategy", "classifier_head_only") != model.training_strategy:
+        raise ValueError("Checkpoint strategy metadata mismatch")
+    if model.training_strategy == "partial_unfreezing":
+        upper = checkpoint["upper_encoder_state_dicts"]
+        if set(upper) != {str(i) for i in model.adapted_layer_indices}:
+            raise ValueError("Checkpoint upper encoder layers are incomplete")
+        for index in model.adapted_layer_indices:
+            model.encoder.encoder.layer[index].load_state_dict(upper[str(index)], strict=True)
+    elif model.training_strategy == "lora":
+        from peft import get_peft_model_state_dict, set_peft_model_state_dict
+        saved = checkpoint["adapter_state_dict"]
+        expected = get_peft_model_state_dict(model.encoder)
+        if set(saved) != set(expected) or any(saved[k].shape != expected[k].shape for k in expected):
+            raise ValueError("Checkpoint adapter keys/shapes are incomplete or incompatible")
+        expected_config = model.encoder.peft_config["default"].to_dict()
+        for key in ("r", "lora_alpha", "lora_dropout", "bias", "target_modules"):
+            left, right = checkpoint["adapter_config"][key], expected_config[key]
+            if key == "target_modules":
+                left, right = sorted(left), sorted(right)
+            if left != right:
+                raise ValueError(f"Checkpoint adapter config mismatch: {key}")
+        set_peft_model_state_dict(model.encoder, saved)
     model.classifier.load_state_dict(checkpoint["classifier_head_state_dict"])
     attention_state = checkpoint.get("attention_pooling_state_dict")
     if model.attention_scorer is not None:
         if attention_state is None:
             raise ValueError("Attention checkpoint is missing attention-pooling parameters")
         model.attention_scorer.load_state_dict(attention_state)
-    model.freeze_encoder()
+    parameter_report(model)
     model.to(device)
+    model.eval()
     return model, checkpoint
 
 
@@ -1154,7 +1363,8 @@ def dry_run_forward(
         if parameter.requires_grad and parameter.grad is None
     ]
     encoder_gradients = [
-        name for name, parameter in model.encoder.named_parameters() if parameter.grad is not None
+        name for name, parameter in model.encoder.named_parameters()
+        if not parameter.requires_grad and parameter.grad is not None
     ]
     if missing_gradients or encoder_gradients:
         raise RuntimeError(
@@ -1197,7 +1407,7 @@ def dry_run_forward(
     )
     LOGGER.info(
         "Dry-run forward PASS | pooling=%s input_shape=%s pooled_shape=%s "
-        "logits_shape=%s loss=%.8f device=%s trainable_gradients=%s encoder_gradients=NONE",
+        "logits_shape=%s loss=%.8f device=%s trainable_gradients=%s frozen_encoder_gradients=NONE",
         model.pooling_type,
         tuple(batch["input_ids"].shape),
         tuple(details["pooled"].shape),
@@ -1207,6 +1417,43 @@ def dry_run_forward(
         trainable_gradient_names,
     )
     model.zero_grad(set_to_none=True)
+
+
+def one_step_preflight(model: FrozenPubMedBertClassifier, frame: pd.DataFrame,
+                       tokenizer: Any, args: argparse.Namespace, criterion: nn.Module,
+                       device: torch.device) -> dict[str, Any]:
+    """One real optimizer update; compare values, including frozen parameters."""
+    before = {name: p.detach().cpu().clone() for name, p in model.named_parameters()}
+    loader = make_loader(frame.iloc[:args.batch_size], tokenizer, args.max_length,
+                         args.batch_size, False, 0, args.seed)
+    optimizer = build_optimizer(model, args)
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
+    loss = train_one_epoch(model, loader, optimizer, criterion, device, 1)
+    changed = [name for name, p in model.named_parameters()
+               if not torch.equal(before[name], p.detach().cpu())]
+    frozen_changed = [name for name, p in model.named_parameters()
+                      if not p.requires_grad and name in changed]
+    if frozen_changed or not any(name.startswith("classifier.") for name in changed):
+        raise RuntimeError(f"Parameter update invariant failed: frozen={frozen_changed}")
+    if model.training_strategy != "classifier_head_only" and not any(name.startswith("encoder.") for name in changed):
+        raise RuntimeError("No encoder/adapter parameter changed")
+    if not np.isfinite(loss):
+        raise RuntimeError("Non-finite preflight loss")
+    result = {"strategy": model.training_strategy, "loss": loss,
+              "changed_parameter_names": changed, "frozen_parameters_unchanged": True,
+              "microbatch_size": min(args.batch_size, len(frame)),
+              "effective_batch_size": min(args.batch_size, len(frame)),
+              "gradient_accumulation_steps": 1, "max_length": args.max_length,
+              "device": str(device)}
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+        result.update(gpu_name=torch.cuda.get_device_name(device),
+                      total_vram_bytes=torch.cuda.get_device_properties(device).total_memory,
+                      peak_allocated_bytes=torch.cuda.max_memory_allocated(device),
+                      peak_reserved_bytes=torch.cuda.max_memory_reserved(device))
+    LOGGER.info("Optimizer-step preflight | %s", json.dumps(result))
+    return result
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -1295,7 +1542,10 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
     # These labels are ordinary text; tokenizer vocabulary and embeddings are unchanged.
-    model = build_model(args.model_name_or_path, args.dropout, args.pooling)
+    model = build_model(args.model_name_or_path, args.dropout, args.pooling, **strategy_options(args))
+    if args.comparison_mode and not smoke_test and not args.dry_run:
+        if model.hidden_size != 768 or model.encoder.config.num_hidden_layers != 12:
+            raise ValueError("Formal comparison requires a 12-layer, hidden-size-768 BERT base")
     model_limit = min(
         int(getattr(tokenizer, "model_max_length", args.max_length)),
         int(getattr(model.encoder.config, "max_position_embeddings", args.max_length)),
@@ -1312,7 +1562,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if parameter.requires_grad
     )
     backbone_frozen = backbone_trainable_parameters == 0
-    if not backbone_frozen:
+    if args.training_strategy == "classifier_head_only" and not backbone_frozen:
         raise RuntimeError(
             f"Frozen-backbone invariant failed: {backbone_trainable_parameters} "
             "encoder parameters are trainable"
@@ -1336,10 +1586,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.dry_run:
         dry_run_forward(model, splits["train"], tokenizer, args, criterion, device)
-        LOGGER.info("Dry-run complete: no training loop or formal checkpoint was written")
+        one_step_preflight(model, splits["train"], tokenizer, args, criterion, device)
+        LOGGER.info("Dry-run complete: one disposable optimizer step; no formal checkpoint written")
         return 0
 
     pooling_output_base = args.output_dir / args.pooling
+    if args.comparison_mode or args.training_strategy != "classifier_head_only":
+        pooling_output_base = args.output_dir / args.training_strategy / f"seed_{args.seed}" / args.pooling
     run_dir = create_run_dir(
         pooling_output_base,
         prefix="smoke" if smoke_test else "run",
@@ -1390,6 +1643,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         summaries["train"]["negative"],
         pos_weight_value,
     )
+    optimizer = build_optimizer(model, args)
     config = {
         **serializable_args(args),
         "smoke_test": smoke_test,
@@ -1397,7 +1651,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "max_validation_samples": args.max_validation_samples,
         "model_name_or_path": args.model_name_or_path,
         "tokenizer_name_or_path": args.model_name_or_path,
-        "training_strategy": "classifier_head_only",
+        "training_strategy": args.training_strategy,
         "pooling": args.pooling,
         "pooling_output_dim": model.pooling_output_dim,
         "attention_pooling_trainable": model.attention_scorer is not None,
@@ -1405,7 +1659,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         "frozen_parameters": parameter_info["frozen_parameters"],
         "backbone_frozen": backbone_frozen,
         "backbone_trainable_parameters": backbone_trainable_parameters,
-        "optimizer": {"name": "AdamW", "learning_rate": args.learning_rate},
+        "optimizer": optimizer_report(optimizer),
+        "warmup": None,
+        "gradient_accumulation_steps": 1,
+        "effective_batch_size": args.batch_size,
         "scheduler": None,
         "gradient_clipping": None,
         "loss": "weighted_BCEWithLogitsLoss",
@@ -1423,16 +1680,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         "truncation_qc": truncation,
         "test_evaluated": bool(args.evaluate_test),
         "environment": {
+            "packages": package_versions(),
             "device": str(device),
             "gpu_name": torch.cuda.get_device_name(0) if device.type == "cuda" else None,
             "pytorch_version": torch.__version__,
             "cuda_version": torch.version.cuda,
             "transformers_version": transformers.__version__,
+            "model_revision": model.model_revision,
         },
     }
     (run_dir / "config.json").write_text(
         json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    (run_dir / "parameter_report.json").write_text(
+        json.dumps(parameter_info, indent=2), encoding="utf-8")
 
     train_loader = make_loader(
         splits["train"], tokenizer, args.max_length, args.batch_size, True,
@@ -1442,19 +1703,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         splits["validation"], tokenizer, args.max_length, args.batch_size, False,
         args.num_workers, args.seed,
     )
-    trainable_params = [parameter for parameter in model.parameters() if parameter.requires_grad]
-    optimizer = AdamW(trainable_params, lr=args.learning_rate)
     initial_trainable_parameters = (
         {
             name: parameter.detach().cpu().clone()
             for name, parameter in model.named_parameters()
-            if parameter.requires_grad
         }
         if smoke_test
         else None
-    )
-    encoder_frozen_before = all(
-        not parameter.requires_grad for parameter in model.encoder.parameters()
     )
 
     history: list[dict[str, Any]] = []
@@ -1477,7 +1732,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         LOGGER.info("Epoch %d | %s", epoch, json.dumps(row))
 
         current_pr_auc = float(metrics["pr_auc"])
-        if not np.isnan(current_pr_auc) and current_pr_auc > best_pr_auc:
+        if is_better_checkpoint(current_pr_auc, best_pr_auc):
             best_pr_auc = current_pr_auc
             best_pr_auc_epoch = epoch
             checkpoint_metrics = {**metrics, "validation_loss": validation_loss}
@@ -1501,6 +1756,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 run_dir / "per_review_validation_metrics.csv", index=False
             )
             best_artifacts = {
+                "training_strategy": args.training_strategy,
                 "pooling": args.pooling,
                 "best_epoch": epoch,
                 "selection_metric": "validation_pr_auc",
@@ -1523,39 +1779,35 @@ def main(argv: Sequence[str] | None = None) -> int:
             for name, parameter in model.named_parameters()
             if parameter.requires_grad
         }
-        encoder_frozen_after = all(
-            not parameter.requires_grad for parameter in model.encoder.parameters()
+        parameter_update_check["frozen_parameters_unchanged"] = all(
+            torch.equal(initial_trainable_parameters[name], parameter.detach().cpu())
+            for name, parameter in model.named_parameters() if not parameter.requires_grad
         )
-        parameter_update_check["encoder_frozen"] = (
-            encoder_frozen_before and encoder_frozen_after
-        )
-        LOGGER.warning(
-            "Smoke parameter update | pooling=%s | classifier.weight changed: %s | "
-            "classifier.bias changed: %s | attention_scorer.weight changed: %s | "
-            "attention_scorer.bias changed: %s | encoder parameters changed: NO (%s)",
-            args.pooling,
-            "YES" if parameter_update_check["classifier.weight_changed"] else "NO",
-            "YES" if parameter_update_check["classifier.bias_changed"] else "NO",
-            (
-                "YES" if parameter_update_check.get("attention_scorer.weight_changed") else "N/A"
-            ),
-            (
-                "YES" if parameter_update_check.get("attention_scorer.bias_changed") else "N/A"
-            ),
-            "still frozen" if parameter_update_check["encoder_frozen"] else "freeze violation",
-        )
-        changed_checks = [
-            changed
-            for name, changed in parameter_update_check.items()
-            if name.endswith("_changed")
-        ]
-        if not all(changed_checks):
-            LOGGER.warning("One or more trainable pooling/classifier parameters did not change")
-        if not parameter_update_check["encoder_frozen"]:
-            raise RuntimeError("Encoder freeze invariant was violated during smoke test")
+        parameter_update_check["encoder_frozen"] = all(
+            not p.requires_grad for p in model.encoder.parameters())
+        if not parameter_update_check["frozen_parameters_unchanged"]:
+            raise RuntimeError("Frozen parameter values changed during smoke test")
+        if not parameter_update_check["classifier.weight_changed"]:
+            raise RuntimeError("Classifier did not update during smoke test")
+        if args.training_strategy != "classifier_head_only" and not any(
+            value for name, value in parameter_update_check.items() if name.startswith("encoder.")
+        ):
+            raise RuntimeError("Encoder/adapter did not update during smoke test")
+        LOGGER.info("Smoke parameter update | %s", json.dumps(parameter_update_check))
+        del initial_trainable_parameters
 
     if best_checkpoint_metrics is None or best_per_review_metrics is None:
         raise RuntimeError("No best checkpoint was selected because validation PR-AUC was NaN")
+    checkpoint_roundtrip = None
+    if smoke_test:
+        restored, _ = load_classifier_checkpoint(run_dir / "best_pr_auc_classifier_head.pt", device)
+        _, _, restored_probabilities, _, _ = evaluate(
+            restored, validation_loader, criterion, device, args.threshold, "Smoke checkpoint round-trip")
+        saved_probabilities = pd.read_csv(run_dir / "validation_predictions.csv")["predicted_probability"].to_numpy()
+        if not np.allclose(restored_probabilities, saved_probabilities, rtol=1e-5, atol=1e-6):
+            raise RuntimeError("Best checkpoint predictions changed after reload")
+        checkpoint_roundtrip = {"passed": True, "rtol": 1e-5, "atol": 1e-6}
+        del restored
     LOGGER.info(
         "Best checkpoint summary | pooling=%s epoch=%d selection=validation_pr_auc metrics=%s",
         args.pooling,
@@ -1573,7 +1825,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         "smoke_test": smoke_test,
         "max_train_samples": args.max_train_samples,
         "max_validation_samples": args.max_validation_samples,
-        "training_strategy": "classifier_head_only",
+        "training_strategy": args.training_strategy,
+        "strategy_config": model.strategy_config,
+        "optimizer": optimizer_report(optimizer),
+        "head_learning_rate": optimizer.param_groups[0]["lr"],
+        "backbone_learning_rate": args.backbone_learning_rate if args.training_strategy == "partial_unfreezing" else None,
+        "adapter_learning_rate": args.adapter_learning_rate if args.training_strategy == "lora" else None,
+        "parameter_report": parameter_info,
         "pooling": args.pooling,
         "pooling_output_dim": model.pooling_output_dim,
         "attention_pooling_trainable": model.attention_scorer is not None,
@@ -1599,6 +1857,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "per_review_validation": best_per_review_metrics,
         "test_evaluated": bool(args.evaluate_test),
         "parameter_update_check": parameter_update_check,
+        "checkpoint_roundtrip": checkpoint_roundtrip,
     }
 
     if args.evaluate_test:

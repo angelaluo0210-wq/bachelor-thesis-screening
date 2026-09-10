@@ -5,3 +5,5 @@ pandas>=2.0
 scikit-learn>=1.3
 tqdm>=4.65
 transformers>=4.40,<6
+# LoRA dependency; install without upgrading the existing CUDA torch/transformers.
+peft==0.20.0
