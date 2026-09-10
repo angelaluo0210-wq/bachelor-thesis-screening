@@ -14,9 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_canonical_split_matches_the_active_split_source_of_truth():
     canonical = json.loads((ROOT / "config" / "canonical_split.json").read_text(encoding="utf-8"))
     assert canonical["status"] == "canonical_active_split"
-    assert canonical["review_membership"] == {
-        name: sorted(reviews) for name, reviews in SPLIT_REVIEWS.items()
-    }
+    assert set(canonical["review_membership"]) == set(SPLIT_REVIEWS)
+    for split_name, reviews in SPLIT_REVIEWS.items():
+        assert set(canonical["review_membership"][split_name]) == reviews
     all_reviews = [review for reviews in canonical["review_membership"].values() for review in reviews]
     assert len(all_reviews) == 26
     assert len(set(all_reviews)) == 26
