@@ -1,0 +1,18 @@
+{
+  "source": "outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_5e-5/lora/seed_42/cls/run_20260910_191547/validation_predictions.csv",
+  "split": "validation",
+  "target_recall": 0.9,
+  "selection_rule": "largest_threshold_with_validation_recall_at_least_target",
+  "selected": {
+    "threshold": 0.025313053,
+    "tp": 373,
+    "tn": 7138,
+    "fp": 14845,
+    "fn": 41,
+    "recall": 0.9009661835748792,
+    "fnr": 0.09903381642512077,
+    "precision": 0.02451044815350243,
+    "specificity": 0.3247054542146204,
+    "predicted_include_rate": 0.6794659999107023
+  }
+}
