@@ -1,0 +1,62 @@
+{
+  "threshold_independent": {
+    "pr_auc": 0.1553127754556926,
+    "roc_auc": 0.9063077312181104
+  },
+  "at_locked_threshold": {
+    "tp": 470,
+    "tn": 5142,
+    "fp": 17978,
+    "fn": 2,
+    "recall": 0.9957627118644068,
+    "precision": 0.025477016478751086,
+    "f1": 0.049682875264270614,
+    "fnr": 0.00423728813559322,
+    "specificity": 0.22240484429065743,
+    "npv": 0.999611197511664,
+    "predicted_include_rate": 0.78195998643608,
+    "workload_reduction": 0.21804001356392,
+    "accuracy": 0.2378772465242455,
+    "threshold": 0.016082723,
+    "pr_auc": 0.1553127754556926,
+    "roc_auc": 0.9063077312181104
+  },
+  "micro_global": {
+    "tp": 470,
+    "tn": 5142,
+    "fp": 17978,
+    "fn": 2,
+    "recall": 0.9957627118644068,
+    "precision": 0.025477016478751086,
+    "f1": 0.049682875264270614,
+    "fnr": 0.00423728813559322,
+    "specificity": 0.22240484429065743,
+    "npv": 0.999611197511664,
+    "predicted_include_rate": 0.78195998643608,
+    "workload_reduction": 0.21804001356392,
+    "accuracy": 0.2378772465242455,
+    "threshold": 0.016082723,
+    "pr_auc": 0.1553127754556926,
+    "roc_auc": 0.9063077312181104
+  },
+  "macro_review_level": {
+    "n_reviews": 4,
+    "recall": 0.9930555555555556,
+    "recall_reviews_defined": 4,
+    "fnr": 0.006944444444444444,
+    "fnr_reviews_defined": 4,
+    "precision": 0.037082455487100895,
+    "precision_reviews_defined": 4,
+    "f1": 0.06723621195753109,
+    "f1_reviews_defined": 4,
+    "specificity": 0.1695827101462145,
+    "specificity_reviews_defined": 4,
+    "npv": 0.9998525943396226,
+    "npv_reviews_defined": 4,
+    "predicted_include_rate": 0.8315183100015016,
+    "predicted_include_rate_reviews_defined": 4,
+    "workload_reduction": 0.16848168999849833,
+    "workload_reduction_reviews_defined": 4
+  },
+  "test_loss_weighted_bce": 0.8665861278145788
+}
