@@ -1,0 +1,227 @@
+{
+  "status": "completed",
+  "created_utc": "2026-09-10T07:07:08.574658+00:00",
+  "smoke": false,
+  "test_disabled": true,
+  "pooling": "cls",
+  "threshold": 0.5,
+  "selection": "validation_AP",
+  "seed": 42,
+  "plan": [
+    {
+      "id": "head_lr_1e-4",
+      "strategy": "classifier_head_only"
+    },
+    {
+      "id": "backbone_lr_1e-5",
+      "strategy": "partial_unfreezing",
+      "backbone_lr": "1e-5"
+    },
+    {
+      "id": "backbone_lr_2e-5",
+      "strategy": "partial_unfreezing",
+      "backbone_lr": "2e-5"
+    },
+    {
+      "id": "adapter_lr_5e-5",
+      "strategy": "lora",
+      "adapter_lr": "5e-5"
+    },
+    {
+      "id": "adapter_lr_1e-4",
+      "strategy": "lora",
+      "adapter_lr": "1e-4"
+    }
+  ],
+  "runs": [
+    {
+      "strategy": "classifier_head_only",
+      "seed": 42,
+      "learning_rates": {
+        "name": "AdamW",
+        "weight_decay": 0.01,
+        "learning_rate": 0.0001,
+        "parameter_groups": [
+          {
+            "name": "classifier",
+            "lr": 0.0001,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 769
+          }
+        ]
+      },
+      "trainable_parameters": 769,
+      "best_epoch": 2,
+      "best_validation_ap": 0.08924537458216866,
+      "checkpoint_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/classifier_head_only/head_lr_1e-4/classifier_head_only/seed_42/cls/run_20260910_150806/best_pr_auc_classifier_head.pt",
+      "run_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/classifier_head_only/head_lr_1e-4/classifier_head_only/seed_42/cls/run_20260910_150806",
+      "summary_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/classifier_head_only/head_lr_1e-4/classifier_head_only/seed_42/cls/run_20260910_150806/run_summary.json",
+      "reused": false
+    },
+    {
+      "strategy": "partial_unfreezing",
+      "seed": 42,
+      "learning_rates": {
+        "name": "AdamW",
+        "weight_decay": 0.01,
+        "learning_rate": 0.0001,
+        "parameter_groups": [
+          {
+            "name": "classifier",
+            "lr": 0.0001,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 769
+          },
+          {
+            "name": "backbone",
+            "lr": 1e-05,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 14175744
+          }
+        ]
+      },
+      "trainable_parameters": 14176513,
+      "best_epoch": 2,
+      "best_validation_ap": 0.055279999501949104,
+      "checkpoint_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/partial_unfreezing/backbone_lr_1e-5/partial_unfreezing/seed_42/cls/run_20260910_162015/best_pr_auc_classifier_head.pt",
+      "run_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/partial_unfreezing/backbone_lr_1e-5/partial_unfreezing/seed_42/cls/run_20260910_162015",
+      "summary_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/partial_unfreezing/backbone_lr_1e-5/partial_unfreezing/seed_42/cls/run_20260910_162015/run_summary.json",
+      "reused": false
+    },
+    {
+      "strategy": "partial_unfreezing",
+      "seed": 42,
+      "learning_rates": {
+        "name": "AdamW",
+        "weight_decay": 0.01,
+        "learning_rate": 0.0001,
+        "parameter_groups": [
+          {
+            "name": "classifier",
+            "lr": 0.0001,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 769
+          },
+          {
+            "name": "backbone",
+            "lr": 2e-05,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 14175744
+          }
+        ]
+      },
+      "trainable_parameters": 14176513,
+      "best_epoch": 2,
+      "best_validation_ap": 0.05516755261819203,
+      "checkpoint_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/partial_unfreezing/backbone_lr_2e-5/partial_unfreezing/seed_42/cls/run_20260910_174829/best_pr_auc_classifier_head.pt",
+      "run_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/partial_unfreezing/backbone_lr_2e-5/partial_unfreezing/seed_42/cls/run_20260910_174829",
+      "summary_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/partial_unfreezing/backbone_lr_2e-5/partial_unfreezing/seed_42/cls/run_20260910_174829/run_summary.json",
+      "reused": false
+    },
+    {
+      "strategy": "lora",
+      "seed": 42,
+      "learning_rates": {
+        "name": "AdamW",
+        "weight_decay": 0.01,
+        "learning_rate": 0.0001,
+        "parameter_groups": [
+          {
+            "name": "classifier",
+            "lr": 0.0001,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 769
+          },
+          {
+            "name": "adapter",
+            "lr": 5e-05,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 294912
+          }
+        ]
+      },
+      "trainable_parameters": 295681,
+      "best_epoch": 4,
+      "best_validation_ap": 0.19005475782306838,
+      "checkpoint_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_5e-5/lora/seed_42/cls/run_20260910_191547/best_pr_auc_classifier_head.pt",
+      "run_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_5e-5/lora/seed_42/cls/run_20260910_191547",
+      "summary_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_5e-5/lora/seed_42/cls/run_20260910_191547/run_summary.json",
+      "reused": false
+    },
+    {
+      "strategy": "lora",
+      "seed": 42,
+      "learning_rates": {
+        "name": "AdamW",
+        "weight_decay": 0.01,
+        "learning_rate": 0.0001,
+        "parameter_groups": [
+          {
+            "name": "classifier",
+            "lr": 0.0001,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 769
+          },
+          {
+            "name": "adapter",
+            "lr": 0.0001,
+            "weight_decay": 0.01,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "parameters": 294912
+          }
+        ]
+      },
+      "trainable_parameters": 295681,
+      "best_epoch": 1,
+      "best_validation_ap": 0.15791645926865475,
+      "checkpoint_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_1e-4/lora/seed_42/cls/run_20260910_215345/best_pr_auc_classifier_head.pt",
+      "run_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_1e-4/lora/seed_42/cls/run_20260910_215345",
+      "summary_path": "/root/bachelor-thesis-screening/outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_1e-4/lora/seed_42/cls/run_20260910_215345/run_summary.json",
+      "reused": false
+    }
+  ]
+}
