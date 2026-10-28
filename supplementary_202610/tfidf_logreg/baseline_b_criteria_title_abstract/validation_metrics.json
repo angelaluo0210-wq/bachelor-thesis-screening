@@ -1,0 +1,27 @@
+{
+  "split": "validation",
+  "selection_metric": "validation_pr_auc",
+  "selected_C": 10.0,
+  "threshold_independent": {
+    "pr_auc": 0.040262761547226564,
+    "roc_auc": 0.5791243826751501
+  },
+  "at_calibrated_validation_threshold": {
+    "tp": 394,
+    "tn": 3471,
+    "fp": 18512,
+    "fn": 20,
+    "recall": 0.9516908212560387,
+    "precision": 0.020839944991008146,
+    "f1": 0.04078674948240166,
+    "fnr": 0.04830917874396135,
+    "specificity": 0.15789473684210525,
+    "npv": 0.9942709825264967,
+    "predicted_include_rate": 0.8441309103897844,
+    "workload_reduction": 0.15586908961021562,
+    "accuracy": 0.1725677546099924,
+    "threshold": 0.0007978570232448817,
+    "pr_auc": 0.040262761547226564,
+    "roc_auc": 0.5791243826751501
+  }
+}

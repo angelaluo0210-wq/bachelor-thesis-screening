@@ -1,0 +1,24 @@
+{
+  "split": "validation",
+  "target_recall": 0.95,
+  "selection_rule": "largest_observed_score_threshold_with_validation_recall_at_least_target",
+  "candidate_threshold_count": 22368,
+  "selected": {
+    "threshold": 0.0007978570232448817,
+    "tp": 394,
+    "tn": 3471,
+    "fp": 18512,
+    "fn": 20,
+    "recall": 0.9516908212560387,
+    "precision": 0.020839944991008146,
+    "f1": 0.04078674948240166,
+    "fnr": 0.04830917874396135,
+    "specificity": 0.15789473684210525,
+    "npv": 0.9942709825264967,
+    "predicted_include_rate": 0.8441309103897844,
+    "workload_reduction": 0.15586908961021562,
+    "accuracy": 0.1725677546099924,
+    "pr_auc": 0.040262761547226564,
+    "roc_auc": 0.5791243826751501
+  }
+}

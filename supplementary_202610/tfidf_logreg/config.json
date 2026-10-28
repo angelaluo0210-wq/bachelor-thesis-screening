@@ -1,0 +1,67 @@
+{
+  "experiment": "supplementary_202610_tfidf_logreg",
+  "test_access": "forbidden",
+  "test_evaluated": false,
+  "canonical_split": "C:\\Users\\86150\\Desktop\\论文代码\\config\\canonical_split.json",
+  "split_dir": "data\\processed\\splits",
+  "criteria_path": "data\\eligibility_criteria(排纳标准).xlsx",
+  "input_variants": {
+    "baseline_a_title_abstract": "title_abstract",
+    "baseline_b_criteria_title_abstract": "criteria_title_abstract"
+  },
+  "tfidf": {
+    "ngram_range": [
+      1,
+      2
+    ],
+    "max_features": 200000,
+    "min_df": 2,
+    "sublinear_tf": true,
+    "truncation": "none; TF-IDF uses complete available text, unlike PubMedBERT max_length=512"
+  },
+  "logistic_regression": {
+    "class_weight": "balanced",
+    "solver": "liblinear",
+    "max_iter": 2000,
+    "C_grid": [
+      0.01,
+      0.1,
+      1.0,
+      10.0
+    ],
+    "random_state": 42
+  },
+  "model_selection": "Validation AP only",
+  "threshold_calibration": "Validation recall >= 0.95; largest eligible observed score",
+  "data_qc": {
+    "train": {
+      "split": "train",
+      "reviews": 18,
+      "rows": 123291,
+      "positive": 1945,
+      "negative": 121346,
+      "positive_rate": 0.015775685167611585,
+      "missing_title": 239,
+      "missing_abstract": 11331,
+      "missing_abstract_positive": 120,
+      "missing_abstract_negative": 11211
+    },
+    "validation": {
+      "split": "validation",
+      "reviews": 4,
+      "rows": 22397,
+      "positive": 414,
+      "negative": 21983,
+      "positive_rate": 0.01848461847568871,
+      "missing_title": 17,
+      "missing_abstract": 1650,
+      "missing_abstract_positive": 25,
+      "missing_abstract_negative": 1625
+    }
+  },
+  "protected_input_sha256": {
+    "config/canonical_split.json": "147bfd3427a73cd42fb0663a79c97725c02bb2b688adcc916c0b007356da82fd",
+    "data/processed/splits/train.csv": "ae2a747abe17ada50a4013949c205bf8531a54c236dfb33c8eea40e73c07a1ab",
+    "data/processed/splits/validation.csv": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12"
+  }
+}

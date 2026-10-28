@@ -60,6 +60,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--criteria-path", type=Path, default=DEFAULT_CRITERIA_PATH)
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument(
+        "--class-weighting", choices=("weighted", "unweighted"), default="weighted",
+        help="weighted preserves the historical train-negative/train-positive BCE weighting.",
+    )
+    parser.add_argument(
         "--model-name-or-path",
         default=MODEL_NAME,
         help="Hugging Face checkpoint name or a local model/tokenizer directory.",
@@ -141,11 +145,16 @@ def validate_strategy_args(args: argparse.Namespace, parser: argparse.ArgumentPa
         parser.error("lora-dropout must be in [0, 1)")
     if sorted(args.lora_target_modules) != ["query", "value"]:
         parser.error("This experiment supports exactly query value LoRA targets")
-    if args.training_strategy != "classifier_head_only" and args.pooling != "cls":
-        parser.error("Partial unfreezing and LoRA require CLS pooling")
+    # The historical partial-unfreezing comparison remains CLS-only.  LoRA may
+    # use the already-established frozen-encoder mean pooling outside the
+    # locked comparison protocol (e.g. supplementary pooling ablations).
+    if args.training_strategy == "partial_unfreezing" and args.pooling != "cls":
+        parser.error("Partial unfreezing requires CLS pooling")
     if args.comparison_mode:
         if args.evaluate_test or args.pooling != "cls" or args.threshold != 0.5:
             parser.error("Comparison requires CLS, threshold=0.5 and test disabled")
+        if args.class_weighting != "weighted":
+            parser.error("Comparison requires the historical weighted BCE")
         if (args.unfreeze_last_n, args.lora_r, args.lora_alpha, args.lora_dropout) != (2, 8, 16, 0.05):
             parser.error("Comparison fixes last_n=2, r=8, alpha=16, LoRA dropout=0.05")
 
@@ -735,8 +744,8 @@ class FrozenPubMedBertClassifier(nn.Module):
         self.pooling_type = pooling_type
         if training_strategy not in STRATEGIES:
             raise ValueError(f"Unsupported training strategy: {training_strategy}")
-        if training_strategy != STRATEGIES[0] and pooling_type != "cls":
-            raise ValueError("Encoder adaptation requires CLS pooling")
+        if training_strategy == "partial_unfreezing" and pooling_type != "cls":
+            raise ValueError("Partial unfreezing requires CLS pooling")
         self.training_strategy = training_strategy
         self.strategy_config = dict(training_strategy=training_strategy,
                                     unfreeze_last_n=unfreeze_last_n, lora_r=lora_r,
@@ -991,6 +1000,29 @@ def compute_pos_weight(train_frame: pd.DataFrame) -> tuple[float, int, int]:
     return weight, positive, negative
 
 
+def build_criterion(
+    train_frame: pd.DataFrame, class_weighting: str, device: torch.device,
+) -> tuple[nn.BCEWithLogitsLoss, float | None, int, int]:
+    """Construct the training loss using Train labels only.
+
+    The weighted branch is byte-for-byte equivalent in semantics to the
+    historical BCE construction; unweighted is an explicit supplementary
+    ablation with no positive-class multiplier.
+    """
+    positive = int((train_frame[LABEL_COLUMN] == 1).sum())
+    negative = int((train_frame[LABEL_COLUMN] == 0).sum())
+    if positive == 0 or negative == 0:
+        raise ValueError("Training split must contain positive and negative examples")
+    if class_weighting == "weighted":
+        pos_weight_value, _, _ = compute_pos_weight(train_frame)
+        tensor = torch.tensor([pos_weight_value], dtype=torch.float32, device=device)
+        return nn.BCEWithLogitsLoss(pos_weight=tensor), pos_weight_value, positive, negative
+    if class_weighting == "unweighted":
+        LOGGER.info("Training loss | unweighted BCE | positive=%d negative=%d", positive, negative)
+        return nn.BCEWithLogitsLoss(), None, positive, negative
+    raise ValueError(f"Unsupported class weighting: {class_weighting}")
+
+
 def make_loader(
     frame: pd.DataFrame,
     tokenizer: Any,
@@ -1198,7 +1230,7 @@ def save_checkpoint(
     args: argparse.Namespace,
     epoch: int,
     metrics: dict[str, Any],
-    pos_weight: float,
+    pos_weight: float | None,
 ) -> None:
     checkpoint = {
         "checkpoint_version": 2,
@@ -1231,7 +1263,7 @@ def save_checkpoint(
         "epoch": int(epoch),
         "validation_metrics": metrics,
         "threshold": float(args.threshold),
-        "pos_weight": float(pos_weight),
+        "pos_weight": float(pos_weight) if pos_weight is not None else None,
         "seed": int(args.seed),
     }
     if model.training_strategy == "partial_unfreezing":
@@ -1572,13 +1604,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"Frozen-backbone invariant failed: {backbone_trainable_parameters} "
             "encoder parameters are trainable"
         )
-    pos_weight_value, _, _ = compute_pos_weight(splits["train"])
+    criterion, pos_weight_value, train_positive, train_negative = build_criterion(
+        splits["train"], args.class_weighting, device
+    )
     if smoke_test:
-        LOGGER.warning("Smoke train positive: %d", summaries["train"]["positive"])
-        LOGGER.warning("Smoke train negative: %d", summaries["train"]["negative"])
-        LOGGER.warning("Smoke train pos_weight: %.10f", pos_weight_value)
-    pos_weight_tensor = torch.tensor([pos_weight_value], dtype=torch.float32, device=device)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight_tensor)
+        LOGGER.warning("Smoke train positive: %d", train_positive)
+        LOGGER.warning("Smoke train negative: %d", train_negative)
+        LOGGER.warning("Smoke train class_weighting=%s pos_weight=%s", args.class_weighting, pos_weight_value)
 
     truncation = {
         "train": report_truncation(splits["train"], tokenizer, args.max_length, "train"),
@@ -1618,9 +1650,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         LOGGER.warning(
             "Smoke train positive: %d | Smoke train negative: %d | "
-            "Smoke train pos_weight: %.10f",
+            "class_weighting=%s | pos_weight=%s",
             summaries["train"]["positive"],
             summaries["train"]["negative"],
+            args.class_weighting,
             pos_weight_value,
         )
         LOGGER.warning(
@@ -1643,7 +1676,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         LOGGER.info("%s truncation QC | %s", split_name, json.dumps(truncation_summary))
     LOGGER.info("Parameter report | %s", json.dumps(parameter_info))
     LOGGER.info(
-        "Training-only class weight | positive=%d negative=%d pos_weight=%.10f",
+        "Training loss | class_weighting=%s | positive=%d negative=%d pos_weight=%s",
+        args.class_weighting,
         summaries["train"]["positive"],
         summaries["train"]["negative"],
         pos_weight_value,
@@ -1670,7 +1704,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "effective_batch_size": args.batch_size,
         "scheduler": None,
         "gradient_clipping": None,
-        "loss": "weighted_BCEWithLogitsLoss",
+        "loss": "weighted_BCEWithLogitsLoss" if args.class_weighting == "weighted" else "BCEWithLogitsLoss",
+        "class_weighting": args.class_weighting,
         "pos_weight": pos_weight_value,
         "checkpoint_selection_metric": "validation_pr_auc",
         "criteria_sheet": criteria_schema.sheet_name,
@@ -1844,7 +1879,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "frozen_parameters": parameter_info["frozen_parameters"],
         "backbone_frozen": backbone_frozen,
         "backbone_trainable_parameters": backbone_trainable_parameters,
-        "loss": "weighted_BCEWithLogitsLoss",
+        "loss": "weighted_BCEWithLogitsLoss" if args.class_weighting == "weighted" else "BCEWithLogitsLoss",
+        "class_weighting": args.class_weighting,
         "pos_weight": pos_weight_value,
         "learning_rate": args.learning_rate,
         "batch_size": args.batch_size,

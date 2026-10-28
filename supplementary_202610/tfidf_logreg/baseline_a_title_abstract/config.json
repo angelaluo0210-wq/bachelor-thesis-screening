@@ -1,0 +1,29 @@
+{
+  "baseline": "baseline_a_title_abstract",
+  "input_variant": "title_abstract",
+  "test_access": "forbidden",
+  "tfidf": {
+    "ngram_range": [
+      1,
+      2
+    ],
+    "max_features": 200000,
+    "min_df": 2,
+    "sublinear_tf": true,
+    "truncation": "none; complete available text, not PubMedBERT's 512-token limit"
+  },
+  "logistic_regression": {
+    "class_weight": "balanced",
+    "solver": "liblinear",
+    "max_iter": 2000,
+    "C_grid": [
+      0.01,
+      0.1,
+      1.0,
+      10.0
+    ],
+    "random_state": 42
+  },
+  "selection_metric": "validation_pr_auc",
+  "target_recall": 0.95
+}

@@ -1,0 +1,44 @@
+{
+  "status": "completed",
+  "test_access": "forbidden",
+  "baseline": "baseline_a_title_abstract",
+  "input_variant": "title_abstract",
+  "directory": "supplementary_202610\\tfidf_logreg\\baseline_a_title_abstract",
+  "selected_C": 10.0,
+  "c_selection_trials": [
+    {
+      "C": 0.01,
+      "validation_pr_auc": 0.03702689892091533
+    },
+    {
+      "C": 0.1,
+      "validation_pr_auc": 0.04035622265177617
+    },
+    {
+      "C": 1.0,
+      "validation_pr_auc": 0.042582285277795576
+    },
+    {
+      "C": 10.0,
+      "validation_pr_auc": 0.044976353577503965
+    }
+  ],
+  "validation_predictions": "supplementary_202610\\tfidf_logreg\\baseline_a_title_abstract\\validation_predictions.csv",
+  "validation_rows": 22397,
+  "threshold": 0.0009869892764944866,
+  "tp": 394,
+  "tn": 2707,
+  "fp": 19276,
+  "fn": 20,
+  "recall": 0.9516908212560387,
+  "precision": 0.020030503304524657,
+  "f1": 0.039235212109141604,
+  "fnr": 0.04830917874396135,
+  "specificity": 0.12314060865214028,
+  "npv": 0.9926659332599926,
+  "predicted_include_rate": 0.8782426217797027,
+  "workload_reduction": 0.12175737822029731,
+  "accuracy": 0.13845604322007413,
+  "pr_auc": 0.044976353577503965,
+  "roc_auc": 0.6474017801634597
+}

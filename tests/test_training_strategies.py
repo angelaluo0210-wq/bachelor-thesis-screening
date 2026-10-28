@@ -206,11 +206,57 @@ def test_ap_selection_and_threshold_independence():
     assert low["recall"] != high["recall"]
 
 
+def test_class_weighting_default_and_unweighted_bce(tiny_base):
+    default = trainer.parse_args(["--model-name-or-path", str(tiny_base), "--training-strategy", "lora"])
+    unweighted = trainer.parse_args(["--model-name-or-path", str(tiny_base), "--training-strategy", "lora", "--class-weighting", "unweighted"])
+    frame = pd.DataFrame({"label_included": [1, 0, 0, 0]})
+    weighted_loss, pos_weight, _, _ = trainer.build_criterion(frame, default.class_weighting, torch.device("cpu"))
+    plain_loss, plain_weight, _, _ = trainer.build_criterion(frame, unweighted.class_weighting, torch.device("cpu"))
+    assert default.class_weighting == "weighted" and pos_weight == 3.0
+    assert weighted_loss.pos_weight.item() == 3.0
+    assert plain_weight is None and plain_loss.pos_weight is None
+    logits, labels = torch.tensor([0.0, 0.0]), torch.tensor([1.0, 0.0])
+    assert plain_loss(logits, labels) == pytest.approx(torch.log(torch.tensor(2.0)).item())
+    with pytest.raises(SystemExit):
+        trainer.parse_args(["--comparison-mode", "--class-weighting", "unweighted"])
+
+
 @pytest.mark.parametrize("extra", [["--evaluate-test"], ["--pooling", "mean"],
                                    ["--threshold", "0.2"], ["--unfreeze-last-n", "1"]])
 def test_comparison_guard(extra):
     with pytest.raises(SystemExit):
         trainer.parse_args(["--comparison-mode", *extra])
+
+
+def test_mean_lora_updates_adapters_keeps_backbone_frozen_and_roundtrips(tiny_base, tmp_path):
+    args = trainer.parse_args(["--model-name-or-path", str(tiny_base), "--training-strategy", "lora",
+                               "--pooling", "mean", "--batch-size", "2", "--max-length", "32"])
+    model = make_model(args)
+    report = trainer.parameter_report(model)
+    assert report["pooling"] == "mean" and report["adapter_parameters"] == 12 * 2 * 8 * 32
+    optimizer, changed = step(model, args)
+    assert len(optimizer.param_groups) == 2
+    assert any(".lora_A." in name or ".lora_B." in name for name in changed)
+    assert all(name.startswith("classifier.") or ".lora_" in name for name in changed)
+    model.eval()
+    with torch.no_grad(): expected = model(**inputs())
+    path = tmp_path / "mean_lora.pt"
+    trainer.save_checkpoint(path, model, args, 1, {"pr_auc": .5}, 2.)
+    restored, _ = trainer.load_classifier_checkpoint(path, torch.device("cpu"))
+    with torch.no_grad(): torch.testing.assert_close(restored(**inputs()), expected, rtol=1e-5, atol=1e-6)
+
+
+def test_mean_pooling_includes_special_tokens_and_excludes_padding(tiny_base):
+    args = trainer.parse_args(["--model-name-or-path", str(tiny_base), "--training-strategy", "lora", "--pooling", "mean"])
+    model = make_model(args)
+    hidden = torch.tensor([[[2., 0.], [4., 2.], [8., 6.], [100., 100.]]])
+    mask = torch.tensor([[1, 1, 1, 0]])
+    pooled, _ = model._pool(hidden, mask, None, None)
+    torch.testing.assert_close(pooled, torch.tensor([[14 / 3, 8 / 3]]))
+    with pytest.raises(SystemExit):
+        trainer.parse_args(["--comparison-mode", "--training-strategy", "lora", "--pooling", "mean"])
+    with pytest.raises(SystemExit):
+        trainer.parse_args(["--training-strategy", "partial_unfreezing", "--pooling", "mean"])
 
 
 def test_runner_matrix_and_test_guard(tmp_path):

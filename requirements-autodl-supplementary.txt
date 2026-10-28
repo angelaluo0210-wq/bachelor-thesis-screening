@@ -1,0 +1,14 @@
+# AutoDL supplementary-experiment overlay. Do NOT install torch from this file.
+# The historical formal LoRA run recorded: torch 2.6.0+cu124, transformers
+# 5.16.1, peft 0.20.0, accelerate 1.15.0, numpy 2.1.3, sklearn 1.9.0.
+# pandas/openpyxl/tqdm/tokenizers exact historical versions were not recorded;
+# bounded compatible ranges below must be logged and reviewed on AutoDL.
+transformers==5.16.1
+peft==0.20.0
+accelerate==1.15.0
+numpy==2.1.3
+scikit-learn==1.9.0
+pandas>=2.0,<3
+openpyxl>=3.1,<4
+tqdm>=4.65,<5
+tokenizers>=0.21,<1

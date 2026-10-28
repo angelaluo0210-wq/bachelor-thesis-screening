@@ -1,0 +1,101 @@
+{
+  "status": "completed",
+  "created_utc": "2026-10-27T22:53:28.722978+00:00",
+  "test_access": "forbidden",
+  "protected_input_sha256_before": {
+    "config/canonical_split.json": "147bfd3427a73cd42fb0663a79c97725c02bb2b688adcc916c0b007356da82fd",
+    "data/processed/splits/train.csv": "ae2a747abe17ada50a4013949c205bf8531a54c236dfb33c8eea40e73c07a1ab",
+    "data/processed/splits/validation.csv": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12"
+  },
+  "protected_input_sha256_after": {
+    "config/canonical_split.json": "147bfd3427a73cd42fb0663a79c97725c02bb2b688adcc916c0b007356da82fd",
+    "data/processed/splits/train.csv": "ae2a747abe17ada50a4013949c205bf8531a54c236dfb33c8eea40e73c07a1ab",
+    "data/processed/splits/validation.csv": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12"
+  },
+  "runs": [
+    {
+      "baseline": "baseline_a_title_abstract",
+      "input_variant": "title_abstract",
+      "directory": "supplementary_202610\\tfidf_logreg\\baseline_a_title_abstract",
+      "selected_C": 10.0,
+      "c_selection_trials": [
+        {
+          "C": 0.01,
+          "validation_pr_auc": 0.03702689892091533
+        },
+        {
+          "C": 0.1,
+          "validation_pr_auc": 0.04035622265177617
+        },
+        {
+          "C": 1.0,
+          "validation_pr_auc": 0.042582285277795576
+        },
+        {
+          "C": 10.0,
+          "validation_pr_auc": 0.044976353577503965
+        }
+      ],
+      "validation_predictions": "supplementary_202610\\tfidf_logreg\\baseline_a_title_abstract\\validation_predictions.csv",
+      "validation_rows": 22397,
+      "threshold": 0.0009869892764944866,
+      "tp": 394,
+      "tn": 2707,
+      "fp": 19276,
+      "fn": 20,
+      "recall": 0.9516908212560387,
+      "precision": 0.020030503304524657,
+      "f1": 0.039235212109141604,
+      "fnr": 0.04830917874396135,
+      "specificity": 0.12314060865214028,
+      "npv": 0.9926659332599926,
+      "predicted_include_rate": 0.8782426217797027,
+      "workload_reduction": 0.12175737822029731,
+      "accuracy": 0.13845604322007413,
+      "pr_auc": 0.044976353577503965,
+      "roc_auc": 0.6474017801634597
+    },
+    {
+      "baseline": "baseline_b_criteria_title_abstract",
+      "input_variant": "criteria_title_abstract",
+      "directory": "supplementary_202610\\tfidf_logreg\\baseline_b_criteria_title_abstract",
+      "selected_C": 10.0,
+      "c_selection_trials": [
+        {
+          "C": 0.01,
+          "validation_pr_auc": 0.03125165713639499
+        },
+        {
+          "C": 0.1,
+          "validation_pr_auc": 0.034014688033236186
+        },
+        {
+          "C": 1.0,
+          "validation_pr_auc": 0.03778210297622818
+        },
+        {
+          "C": 10.0,
+          "validation_pr_auc": 0.040262761547226564
+        }
+      ],
+      "validation_predictions": "supplementary_202610\\tfidf_logreg\\baseline_b_criteria_title_abstract\\validation_predictions.csv",
+      "validation_rows": 22397,
+      "threshold": 0.0007978570232448817,
+      "tp": 394,
+      "tn": 3471,
+      "fp": 18512,
+      "fn": 20,
+      "recall": 0.9516908212560387,
+      "precision": 0.020839944991008146,
+      "f1": 0.04078674948240166,
+      "fnr": 0.04830917874396135,
+      "specificity": 0.15789473684210525,
+      "npv": 0.9942709825264967,
+      "predicted_include_rate": 0.8441309103897844,
+      "workload_reduction": 0.15586908961021562,
+      "accuracy": 0.1725677546099924,
+      "pr_auc": 0.040262761547226564,
+      "roc_auc": 0.5791243826751501
+    }
+  ]
+}
