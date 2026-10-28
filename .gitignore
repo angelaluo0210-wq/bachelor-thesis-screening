@@ -1,6 +1,8 @@
 # Python virtual environment
 .venv/
 venv/
+.env
+.env.*
 
 # Python cache
 __pycache__/
@@ -15,6 +17,7 @@ data/
 outputs/
 checkpoints/
 models/
+supplementary_202610/llm_baseline/
 
 # Hugging Face cache
 .cache/
