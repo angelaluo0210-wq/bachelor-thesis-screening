@@ -69,7 +69,12 @@ def create_or_resume_run(run_dir: Path, configuration: dict[str, Any], resume: b
     manifest = {
         "schema_version": 1, "created_utc": datetime.now(timezone.utc).isoformat(),
         "configuration": configuration, "configuration_fingerprint": fingerprint,
-        "prediction_file": "predictions.jsonl", "test_access": "forbidden", "test_evaluated": False,
+        "prediction_file": "predictions.jsonl",
+        # Validation callers retain the historical default.  A separately
+        # authorized final-Test runner records its explicit phase instead of
+        # masquerading as a Validation artifact.
+        "test_access": configuration.get("test_access", "forbidden"),
+        "test_evaluated": bool(configuration.get("test_evaluated", False)),
     }
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return manifest

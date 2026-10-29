@@ -7,6 +7,8 @@ import json
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -104,7 +106,28 @@ class QwenClient:
             return exc.code == 429 or 500 <= exc.code <= 599
         return isinstance(exc, (urllib.error.URLError, TimeoutError, OSError))
 
-    def classify_with_retries(self, prompt: str, sleep: Any = time.sleep) -> tuple[ParsedDecision, dict[str, Any] | None, int, str | None]:
+    @staticmethod
+    def _retry_after_seconds(exc: Exception) -> float | None:
+        """Return a provider Retry-After delay when a retryable HTTP error supplies one."""
+        if not isinstance(exc, urllib.error.HTTPError):
+            return None
+        value = exc.headers.get("Retry-After") if exc.headers is not None else None
+        if not value:
+            return None
+        try:
+            return max(0.0, float(value))
+        except ValueError:
+            try:
+                target = parsedate_to_datetime(value)
+                if target.tzinfo is None:
+                    target = target.replace(tzinfo=timezone.utc)
+                return max(0.0, (target - datetime.now(timezone.utc)).total_seconds())
+            except (TypeError, ValueError, IndexError, OverflowError):
+                return None
+
+    def classify_with_retries(
+        self, prompt: str, sleep: Any = time.sleep, before_attempt: Any | None = None,
+    ) -> tuple[ParsedDecision, dict[str, Any] | None, int, str | None]:
         """Retry transport errors and malformed output a bounded number of times.
 
         A valid ``uncertain`` decision is never retried. A malformed response
@@ -113,6 +136,8 @@ class QwenClient:
         last_error = None
         for attempt in range(1, self.config.max_retries + 2):
             try:
+                if before_attempt is not None:
+                    before_attempt()
                 parsed, response = self.classify(prompt)
                 if parsed.status == "malformed" and attempt <= self.config.max_retries:
                     sleep(min(2 ** (attempt - 1), 8))
@@ -123,7 +148,8 @@ class QwenClient:
                     raise
                 last_error = self._safe_error(exc)
                 if attempt <= self.config.max_retries and self._retryable(exc):
-                    sleep(min(2 ** (attempt - 1), 8))
+                    retry_after = self._retry_after_seconds(exc)
+                    sleep(max(min(2 ** (attempt - 1), 8), retry_after or 0.0))
                     continue
                 return ParsedDecision("transport_error", None, last_error), None, attempt - 1, last_error
         return ParsedDecision("transport_error", None, last_error), None, self.config.max_retries, last_error

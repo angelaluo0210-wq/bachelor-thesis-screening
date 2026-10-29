@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from email.message import Message
+from urllib.error import HTTPError
 
 import numpy as np
 import pandas as pd
@@ -141,6 +143,18 @@ def test_transport_error_redacts_injected_key():
     parsed, _, retries, error = client.classify_with_retries("prompt", sleep=lambda _: None)
     assert parsed.status == "transport_error" and retries == 0
     assert "secret-value" not in error and "[REDACTED]" in error
+
+
+def test_client_honors_retry_after_for_http_429():
+    headers = Message(); headers["Retry-After"] = "4"
+    limited = HTTPError("https://example.invalid", 429, "limited", headers, None)
+    transport = MockTransport([limited, {"choices": [{"message": {"content": '{"decision":"include"}'}}]}])
+    waits = []
+    parsed, _, retries, error = QwenClient(QwenConfig(max_retries=1), transport, api_key="synthetic").classify_with_retries(
+        "prompt", sleep=waits.append
+    )
+    assert parsed.decision == "include" and retries == 1 and error is None
+    assert waits == [4.0]
 
 
 def test_resume_fingerprint_and_prediction_storage(tmp_path):
