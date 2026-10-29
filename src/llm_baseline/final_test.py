@@ -206,24 +206,57 @@ def require_complete_prediction_set(
         )
 
 
+def _qwen_evaluation_frame(
+    source: pd.DataFrame, qwen_predictions: pd.DataFrame,
+    expected_reviews: frozenset[str] = LOCKED_TEST_REVIEWS,
+    expected_records: int = LOCKED_TEST_RECORDS,
+) -> pd.DataFrame:
+    """Validate the complete Qwen/gold population and build frozen-policy inputs."""
+    require_complete_prediction_set(source, qwen_predictions, expected_reviews, expected_records)
+    required_qwen = {"review_name", *data.IDENTIFIER_COLUMNS, "true_label", "status", "decision", "record_id"}
+    missing_qwen = required_qwen - set(qwen_predictions)
+    if missing_qwen:
+        raise FinalEvaluationGateError(f"Qwen predictions are missing columns: {sorted(missing_qwen)}")
+    qwen_alignment = validate_one_to_one_alignment(source, qwen_predictions)
+    if qwen_alignment.status != "verified_synthetic":
+        raise FinalEvaluationGateError("One-to-one Qwen/gold alignment failed")
+
+    source_ids = [record_id_for_row(row.to_dict(), index) for index, (_, row) in enumerate(source.iterrows())]
+    qwen_by_id = qwen_predictions.set_index("record_id")
+    if not qwen_by_id.index.is_unique:
+        raise FinalEvaluationGateError("Qwen prediction record IDs are not unique")
+    rows = []
+    for record_id, (_, row) in zip(source_ids, source.iterrows()):
+        qwen = qwen_by_id.loc[record_id]
+        rows.append({data.REVIEW_COLUMN: row[data.REVIEW_COLUMN], data.LABEL_COLUMN: int(row[data.LABEL_COLUMN]),
+                     "status": qwen["status"], "decision": qwen["decision"]})
+    return pd.DataFrame(rows)
+
+
+def evaluate_qwen_final(
+    source: pd.DataFrame, qwen_predictions: pd.DataFrame,
+    expected_reviews: frozenset[str] = LOCKED_TEST_REVIEWS,
+    expected_records: int = LOCKED_TEST_RECORDS,
+) -> dict[str, Any]:
+    """Primary Qwen Test metrics, independent of any PubMedBERT prediction file."""
+    frame = _qwen_evaluation_frame(source, qwen_predictions, expected_reviews, expected_records)
+    return evaluate_policy_records(frame)
+
+
 def evaluate_final_gate(
     source: pd.DataFrame, qwen_predictions: pd.DataFrame, pubmedbert_predictions: pd.DataFrame,
     expected_reviews: frozenset[str] = LOCKED_TEST_REVIEWS,
     expected_records: int = LOCKED_TEST_RECORDS,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
-    """Validate three-way identity/labels, then calculate only frozen-policy metrics."""
-    require_complete_prediction_set(source, qwen_predictions, expected_reviews, expected_records)
-    required_qwen = {"review_name", *data.IDENTIFIER_COLUMNS, "true_label", "status", "decision", "record_id"}
+    """Optional supplementary Qwen--PubMedBERT paired analysis after primary Qwen evaluation."""
+    evaluation_frame = _qwen_evaluation_frame(source, qwen_predictions, expected_reviews, expected_records)
     required_pubmed = {"review_name", "true_label", "predicted_label", *data.IDENTIFIER_COLUMNS}
-    missing_qwen, missing_pubmed = required_qwen - set(qwen_predictions), required_pubmed - set(pubmedbert_predictions)
-    if missing_qwen or missing_pubmed:
-        raise FinalEvaluationGateError(
-            f"Missing prediction columns: qwen={sorted(missing_qwen)}, pubmedbert={sorted(missing_pubmed)}"
-        )
-    qwen_alignment = validate_one_to_one_alignment(source, qwen_predictions)
+    missing_pubmed = required_pubmed - set(pubmedbert_predictions)
+    if missing_pubmed:
+        raise FinalEvaluationGateError(f"PubMedBERT predictions are missing columns: {sorted(missing_pubmed)}")
     pubmed_alignment = validate_one_to_one_alignment(source, pubmedbert_predictions)
-    if qwen_alignment.status != "verified_synthetic" or pubmed_alignment.status != "verified_synthetic":
-        raise FinalEvaluationGateError("One-to-one Qwen/PubMedBERT/gold alignment failed")
+    if pubmed_alignment.status != "verified_synthetic":
+        raise FinalEvaluationGateError("One-to-one PubMedBERT/gold alignment failed")
     if not set(pd.to_numeric(pubmedbert_predictions["predicted_label"], errors="coerce").dropna().unique()).issubset({0, 1}):
         raise FinalEvaluationGateError("PubMedBERT predicted_label must be binary")
 
@@ -239,18 +272,15 @@ def evaluate_final_gate(
     pubmed_by_id = pubmedbert_predictions.assign(record_id=pubmed_ids).set_index("record_id")
     if not pubmed_by_id.index.is_unique:
         raise FinalEvaluationGateError("PubMedBERT prediction record IDs are not unique")
-    evaluation_rows = []
     paired_rows = []
     for record_id, (_, row) in zip(source_ids, source.iterrows()):
         qwen, pubmed = qwen_by_id.loc[record_id], pubmed_by_id.loc[record_id]
-        evaluation_rows.append({data.REVIEW_COLUMN: row[data.REVIEW_COLUMN], data.LABEL_COLUMN: int(row[data.LABEL_COLUMN]),
-                                "status": qwen["status"], "decision": qwen["decision"]})
         paired_rows.append({"record_id": record_id, "review_name": row[data.REVIEW_COLUMN],
                             "true_label": int(row[data.LABEL_COLUMN]), "qwen_status": qwen["status"],
                             "qwen_decision": qwen["decision"], "pubmedbert_predicted_label": int(pubmed["predicted_label"])})
-    metrics = evaluate_policy_records(pd.DataFrame(evaluation_rows))
+    metrics = evaluate_policy_records(evaluation_frame)
     paired = pd.DataFrame(paired_rows)
     # The frozen policy turns all unresolved Qwen outcomes into retained=1.
-    paired["qwen_retained"] = apply_screening_policy(pd.DataFrame(evaluation_rows))["retained"].to_numpy()
+    paired["qwen_retained"] = apply_screening_policy(evaluation_frame)["retained"].to_numpy()
     paired["decision_difference"] = paired["qwen_retained"] != paired["pubmedbert_predicted_label"]
     return metrics, paired

@@ -25,7 +25,7 @@ from scripts.run_qwen_baseline import _git_metadata, _tokenizer_identity
 from src import screening_data as data
 from src.llm_baseline.client import QwenClient, QwenConfig, UrllibTransport
 from src.llm_baseline.final_test import (
-    FINAL_TEST_UNLOCK_ACKNOWLEDGEMENT, ConservativeRateLimiter, evaluate_final_gate,
+    ConservativeRateLimiter, evaluate_final_gate, evaluate_qwen_final,
     execute_final_records, load_authorized_test, require_final_test_authorization,
     validate_locked_test_population,
 )
@@ -39,7 +39,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--test-split", type=Path, required=True)
     parser.add_argument("--criteria-path", type=Path, required=True)
-    parser.add_argument("--pubmedbert-predictions", type=Path, required=True)
+    parser.add_argument("--pubmedbert-predictions", type=Path,
+                        help="Optional frozen PubMedBERT per-record predictions for supplementary paired analysis.")
     parser.add_argument("--model-name-or-path", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--max-length", type=int, default=512)
@@ -97,28 +98,41 @@ def main(argv: Sequence[str] | None = None) -> int:
         "prompt_version": PROMPT_VERSION, "prompt_sha256": prompt_fingerprint(),
         "api": QwenConfig().public_dict(), "requests_per_minute": args.requests_per_minute,
         "input_sha256": {"test.csv": sha256_file(args.test_split),
-                           "criteria.xlsx": sha256_file(args.criteria_path),
-                           "pubmedbert_predictions.csv": sha256_file(args.pubmedbert_predictions)},
+                           "criteria.xlsx": sha256_file(args.criteria_path)},
         "tokenizer": _tokenizer_identity(args.model_name_or_path),
         "runtime": {"python": platform.python_version(), "transformers": transformers.__version__},
         "source": _git_metadata(),
         "population": {"records": len(test), "reviews": sorted(test[data.REVIEW_COLUMN].astype(str).unique()),
                        "sampling": "forbidden"},
     }
+    if args.pubmedbert_predictions is not None:
+        config["input_sha256"]["pubmedbert_predictions.csv"] = sha256_file(args.pubmedbert_predictions)
     manifest = create_or_resume_run(args.output_dir, config, args.resume)
     _write_json(args.output_dir / "reconstruction_audit.json", audit)
     result = execute_final_records(test, tokenizer, args.max_length,
                                    QwenClient(QwenConfig(), UrllibTransport()), args.output_dir,
                                    ConservativeRateLimiter(args.requests_per_minute))
     predictions = _read_jsonl(args.output_dir / "predictions.jsonl")
-    pubmedbert = pd.read_csv(args.pubmedbert_predictions, low_memory=False)
-    metrics, paired = evaluate_final_gate(test, predictions, pubmedbert)
-    paired.to_csv(args.output_dir / "paired_prediction_differences.csv", index=False)
+    metrics = evaluate_qwen_final(test, predictions)
+    comparison = {
+        "paired_analysis": "not_requested",
+        "note": "PubMedBERT comparison metrics, if reported, come from its prior independent final Test evaluation; no paired error analysis was performed.",
+    }
+    if args.pubmedbert_predictions is not None:
+        pubmedbert = pd.read_csv(args.pubmedbert_predictions, low_memory=False)
+        _, paired = evaluate_final_gate(test, predictions, pubmedbert)
+        paired.to_csv(args.output_dir / "paired_prediction_differences.csv", index=False)
+        comparison = {"paired_analysis": "completed", "pubmedbert_prediction_path": str(args.pubmedbert_predictions)}
     pd.DataFrame(metrics["per_review"]).to_csv(args.output_dir / "per_review_qwen_metrics.csv", index=False)
-    _write_json(args.output_dir / "qwen_final_test_metrics.json", metrics)
+    _write_json(args.output_dir / "qwen_final_test_metrics.json", {
+        **metrics,
+        "comparison_note": "PubMedBERT comparison metrics are from a prior independent final Test evaluation; this Qwen run does not require or perform paired error analysis unless supplementary predictions are explicitly supplied.",
+        "supplementary_paired_analysis": comparison,
+    })
     _write_json(args.output_dir / "final_test_execution_summary.json", {
         "manifest": manifest, "configuration_fingerprint": configuration_fingerprint(config),
-        "test_evaluated": True, "complete_population_verified": True, **result,
+        "test_evaluated": True, "complete_population_verified": True,
+        "supplementary_paired_analysis": comparison, **result,
     })
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

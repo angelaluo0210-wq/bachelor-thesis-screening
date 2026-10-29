@@ -11,7 +11,7 @@ import pytest
 from scripts import run_qwen_final_test as runner
 from src.llm_baseline.final_test import (
     ConservativeRateLimiter, FinalEvaluationGateError, FinalTestAuthorizationError,
-    evaluate_final_gate, execute_final_records, load_authorized_test,
+    evaluate_final_gate, evaluate_qwen_final, execute_final_records, load_authorized_test,
     require_complete_prediction_set, validate_locked_test_population,
 )
 from src.llm_baseline.prompt import ParsedDecision
@@ -119,6 +119,12 @@ def _pubmed_predictions() -> pd.DataFrame:
 
 
 def test_final_evaluation_requires_three_way_alignment_and_emits_hard_label_metrics():
+    primary = evaluate_qwen_final(_frame(), _qwen_predictions(), REVIEWS, 2)
+    assert primary["micro_global"]["pr_auc"] is None
+    assert primary["micro_global"]["recall"] == 1.0
+    wrong_qwen_labels = _qwen_predictions().copy(); wrong_qwen_labels.loc[0, "true_label"] = 0
+    with pytest.raises(FinalEvaluationGateError, match="Qwen/gold alignment"):
+        evaluate_qwen_final(_frame(), wrong_qwen_labels, REVIEWS, 2)
     metrics, paired = evaluate_final_gate(_frame(), _qwen_predictions(), _pubmed_predictions(), REVIEWS, 2)
     assert metrics["micro_global"]["pr_auc"] is None
     assert metrics["micro_global"]["recall"] == 1.0 and len(paired) == 2
@@ -140,11 +146,13 @@ def test_unauthorized_loader_refuses_before_any_test_read(monkeypatch):
         load_authorized_test(Path("synthetic-test.csv"), "wrong")
     assert not called
     with pytest.raises(SystemExit):
-        runner.parse_args(["--test-split", "x", "--criteria-path", "y", "--pubmedbert-predictions", "z",
-                           "--model-name-or-path", "m", "--output-dir", "o"])
+        runner.parse_args(["--test-split", "x", "--criteria-path", "y", "--model-name-or-path", "m", "--output-dir", "o"])
     with pytest.raises(SystemExit):
-        runner.parse_args(["--test-split", "x", "--criteria-path", "y", "--pubmedbert-predictions", "z",
-                           "--model-name-or-path", "m", "--output-dir", "o", "--execute", "--max-records", "1"])
+        runner.parse_args(["--test-split", "x", "--criteria-path", "y", "--model-name-or-path", "m",
+                           "--output-dir", "o", "--execute", "--max-records", "1"])
+    accepted = runner.parse_args(["--test-split", "x", "--criteria-path", "y", "--model-name-or-path", "m",
+                                  "--output-dir", "o", "--execute", "--unlock-test", "synthetic"])
+    assert accepted.pubmedbert_predictions is None
 
 
 def test_rate_limiter_waits_between_attempts():
