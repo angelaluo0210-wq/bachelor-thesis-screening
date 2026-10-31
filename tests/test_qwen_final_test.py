@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -11,7 +12,7 @@ import pytest
 from scripts import run_qwen_final_test as runner
 from src.llm_baseline.final_test import (
     ConservativeRateLimiter, FinalEvaluationGateError, FinalTestAuthorizationError,
-    evaluate_final_gate, evaluate_qwen_final, execute_final_records, load_authorized_test,
+    _atomic_json, evaluate_final_gate, evaluate_qwen_final, execute_final_records, load_authorized_test,
     require_complete_prediction_set, validate_locked_test_population,
 )
 from src.llm_baseline.prompt import ParsedDecision
@@ -161,3 +162,50 @@ def test_rate_limiter_waits_between_attempts():
     limiter = ConservativeRateLimiter(60, clock=lambda: time[0], sleep=lambda seconds: waits.append(seconds))
     limiter.wait(); limiter.wait()
     assert waits == [1.0]
+
+
+def test_atomic_json_retries_permission_error_then_replaces_with_unique_temp(tmp_path):
+    target = tmp_path / "progress.json"
+    target.write_text('{"old": true}\n', encoding="utf-8")
+    # This mimics the fixed-name artifact left by the interrupted Windows run.
+    stale_fixed_name = tmp_path / "progress.json.tmp"
+    stale_fixed_name.write_text("stale\n", encoding="utf-8")
+    attempts: list[tuple[Path, Path]] = []
+    delays: list[float] = []
+
+    def flaky_replace(source: str | Path, destination: str | Path) -> None:
+        attempts.append((Path(source), Path(destination)))
+        if len(attempts) < 3:
+            raise PermissionError(5, "Access is denied", str(destination))
+        os.replace(source, destination)
+
+    _atomic_json(target, {"completed_records": 2}, max_replace_attempts=5,
+                 retry_base_seconds=0.01, replace=flaky_replace, sleep=delays.append)
+
+    assert len(attempts) == 3
+    assert delays == [0.01, 0.02]
+    assert json.loads(target.read_text(encoding="utf-8")) == {"completed_records": 2}
+    assert stale_fixed_name.read_text(encoding="utf-8") == "stale\n"
+    assert all(source.name != stale_fixed_name.name for source, _ in attempts)
+    assert not list(tmp_path.glob(".progress.json.*.tmp"))
+
+
+def test_atomic_json_preserves_target_and_reports_when_permission_errors_persist(tmp_path):
+    target = tmp_path / "progress.json"
+    target.write_text('{"completed_records": 1}\n', encoding="utf-8")
+    calls = 0
+
+    def always_locked(source: str | Path, destination: str | Path) -> None:
+        nonlocal calls
+        calls += 1
+        raise PermissionError(5, "Access is denied", str(destination))
+
+    with pytest.raises(PermissionError, match="failed after 3 attempts; temporary snapshot retained"):
+        _atomic_json(target, {"completed_records": 2}, max_replace_attempts=3,
+                     retry_base_seconds=0.0, replace=always_locked, sleep=lambda _: None)
+
+    assert calls == 3
+    assert json.loads(target.read_text(encoding="utf-8")) == {"completed_records": 1}
+    retained = list(tmp_path.glob(".progress.json.*.tmp"))
+    assert len(retained) == 1
+    assert json.loads(retained[0].read_text(encoding="utf-8")) == {"completed_records": 2}

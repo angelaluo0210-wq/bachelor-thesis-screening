@@ -8,7 +8,9 @@ designed to be exercised solely with synthetic frames in offline tests.
 from __future__ import annotations
 
 import json
+import os
 import time
+import uuid
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -109,10 +111,42 @@ def _outcome_category(status: str | None, decision: str | None) -> str:
     return f"unknown_status:{status}"
 
 
-def _atomic_json(path: Path, value: dict[str, Any]) -> None:
-    temporary = path.with_suffix(path.suffix + ".tmp")
+def _atomic_json(
+    path: Path,
+    value: dict[str, Any],
+    *,
+    max_replace_attempts: int = 5,
+    retry_base_seconds: float = 0.1,
+    replace: Callable[[str | Path, str | Path], None] | None = None,
+    sleep: Callable[[float], None] | None = None,
+) -> None:
+    """Atomically replace a JSON status file, tolerating brief Windows share locks.
+
+    Prediction JSONL durability is intentionally independent of this best-effort
+    progress snapshot.  A unique sibling temporary file prevents a stale file
+    from another process from being reused.  If the destination remains locked,
+    the exception is raised before another prediction is requested; the unique
+    temporary snapshot is retained for diagnosis rather than overwriting data.
+    """
+    if max_replace_attempts < 1:
+        raise ValueError("max_replace_attempts must be at least 1")
+    if retry_base_seconds < 0:
+        raise ValueError("retry_base_seconds must be non-negative")
+    replace = os.replace if replace is None else replace
+    sleep = time.sleep if sleep is None else sleep
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    temporary.replace(path)
+    for attempt in range(max_replace_attempts):
+        try:
+            replace(temporary, path)
+            return
+        except PermissionError as exc:
+            if attempt + 1 == max_replace_attempts:
+                raise PermissionError(
+                    f"Atomic replace of {path} failed after {max_replace_attempts} attempts; "
+                    f"temporary snapshot retained at {temporary}"
+                ) from exc
+            sleep(retry_base_seconds * (2 ** attempt))
 
 
 def _prediction_metadata(row: dict[str, Any]) -> dict[str, Any]:
