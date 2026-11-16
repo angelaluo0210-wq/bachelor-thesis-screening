@@ -42,11 +42,16 @@ def reconstruction_audit(frame: pd.DataFrame, tokenizer: Any, max_length: int) -
 
 def _response_metadata(response: dict[str, Any] | None) -> dict[str, Any]:
     if not response:
-        return {"returned_model": None, "provider_request_id": None}
+        return {"returned_model": None, "provider_request_id": None, "finish_reason": None}
+    try:
+        finish_reason = response["choices"][0].get("finish_reason")
+    except (KeyError, IndexError, TypeError):
+        finish_reason = None
     return {
         "returned_model": response.get("model") if isinstance(response.get("model"), str) else None,
         "provider_request_id": next((response.get(key) for key in ("_qwen_provider_request_id", "request_id", "id")
                                      if isinstance(response.get(key), str)), None),
+        "finish_reason": finish_reason if isinstance(finish_reason, str) else None,
     }
 
 

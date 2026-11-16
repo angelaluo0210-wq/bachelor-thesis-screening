@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-11-13T11:03:28.472621+00:00",
+  "configuration": {
+    "phase": "test_subset_qwen_full",
+    "records": 5000,
+    "sample_manifest_sha256": "a33d1477ca96f124d91f7a6559f707afa3bf2017364cadc1cffd4bd2d2338539",
+    "input_sha256": {
+      "test.csv": "23728ed5139430ee3531b4432a2acadcd49aff8c3d4180fa50f53b082e7ab658",
+      "criteria.xlsx": "7a682824979cf65fec650ba31f6375637a2fe0fb24e7d979b66d5cb55b369b7c"
+    },
+    "api": {
+      "model": "qwen3.8-flash",
+      "base_url": "https://ws-b72yc4qdpbcg0dpv.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+      "temperature": 0.0,
+      "enable_thinking": false,
+      "stream": false,
+      "request_json_object": true,
+      "max_retries": 3,
+      "max_tokens": 128
+    },
+    "requests_per_minute": 30.0,
+    "prompt_version": "qwen-zero-shot-screening-v2",
+    "prompt_sha256": "92d5ec3e57208464fdfafece65202a68d3363b790a64a9821cdfdc335317625a",
+    "screening_policy": "retain_unresolved_v1",
+    "context_check": {
+      "method": "utf8_bytes_plus_chat_allowance_not_token_count",
+      "safe_limit_bytes": 900000
+    }
+  },
+  "configuration_fingerprint": "3f44caaad96457b06b402675773ac990c97b162f40beee182ec6090ceddc8395",
+  "prediction_file": "predictions.jsonl",
+  "test_access": "forbidden",
+  "test_evaluated": false
+}

@@ -1,0 +1,211 @@
+{
+  "analysis_type": "post_hoc_article_disjoint_sensitivity_using_frozen_predictions",
+  "primary_evaluation_name": "review-disjoint evaluation",
+  "sensitivity_subset_name": "identifier-confirmed article-disjoint subset",
+  "identity_rule": "A Test row overlaps when any valid normalized exact DOI, PMID, or OpenAlex ID occurs in Train or Validation.",
+  "normalization": {
+    "doi": "lowercase; trim; remove doi:, doi.org, or dx.doi.org prefix; require conservative DOI syntax",
+    "pmid": "lowercase; trim; remove PMID or PubMed URL prefix; require digits",
+    "openalex_id": "lowercase; trim; remove OpenAlex prefix/URL; require W followed by digits",
+    "title_or_semantic_matching": false
+  },
+  "canonical_paths": {
+    "train": "data/processed/splits/train.csv",
+    "validation": "data/processed/splits/validation.csv",
+    "test": "data/processed/splits/test.csv",
+    "canonical_split": "config/canonical_split.json",
+    "predictions": "outputs/final_test/final_test_predictions.csv",
+    "metrics": "outputs/final_test/final_test_metrics.json",
+    "final_config": "outputs/final_test/final_test_config.json",
+    "threshold": "results/formal_training_strategy_20260910/thresholds/selected_validation_threshold.json",
+    "manifest": "outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/comparison_manifest.json",
+    "checkpoint": "outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_5e-5/lora/seed_42/cls/run_20260910_191547/best_pr_auc_classifier_head.pt"
+  },
+  "canonical_sha256_before_and_after": {
+    "train": {
+      "before": "ae2a747abe17ada50a4013949c205bf8531a54c236dfb33c8eea40e73c07a1ab",
+      "after": "ae2a747abe17ada50a4013949c205bf8531a54c236dfb33c8eea40e73c07a1ab",
+      "unchanged": true
+    },
+    "validation": {
+      "before": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12",
+      "after": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12",
+      "unchanged": true
+    },
+    "test": {
+      "before": "23728ed5139430ee3531b4432a2acadcd49aff8c3d4180fa50f53b082e7ab658",
+      "after": "23728ed5139430ee3531b4432a2acadcd49aff8c3d4180fa50f53b082e7ab658",
+      "unchanged": true
+    },
+    "canonical_split": {
+      "before": "147bfd3427a73cd42fb0663a79c97725c02bb2b688adcc916c0b007356da82fd",
+      "after": "147bfd3427a73cd42fb0663a79c97725c02bb2b688adcc916c0b007356da82fd",
+      "unchanged": true
+    },
+    "predictions": {
+      "before": "1ccdbb13d577e5369da4f21e61138ef052f49e91127f32674f6800e9710af876",
+      "after": "1ccdbb13d577e5369da4f21e61138ef052f49e91127f32674f6800e9710af876",
+      "unchanged": true
+    },
+    "metrics": {
+      "before": "b79980068a7cf7a50ba43fba67ac211baf4d7e44780b68ad9e1b22b88b15dc35",
+      "after": "b79980068a7cf7a50ba43fba67ac211baf4d7e44780b68ad9e1b22b88b15dc35",
+      "unchanged": true
+    },
+    "final_config": {
+      "before": "df6a4ad60f4ca92c2e6e9d75d485bb0b0a2f7977f3ed93f60a959d33d7b3b1d4",
+      "after": "df6a4ad60f4ca92c2e6e9d75d485bb0b0a2f7977f3ed93f60a959d33d7b3b1d4",
+      "unchanged": true
+    },
+    "threshold": {
+      "before": "f1997e524d3220987177dae8cd7e3084051d52025bfe3d5a3ab2c71642f091b7",
+      "after": "f1997e524d3220987177dae8cd7e3084051d52025bfe3d5a3ab2c71642f091b7",
+      "unchanged": true
+    },
+    "manifest": {
+      "before": "cb69b7a0382b60c6a7563bd11c63d4e5e0a949977a0a2aa9cad8f4ffc8aea13d",
+      "after": "cb69b7a0382b60c6a7563bd11c63d4e5e0a949977a0a2aa9cad8f4ffc8aea13d",
+      "unchanged": true
+    },
+    "checkpoint": {
+      "before": "f635ed339a6902d4f2c695b27baf3ed977813c1fa361c9b61f9cf293fe44a6d1",
+      "after": "f635ed339a6902d4f2c695b27baf3ed977813c1fa361c9b61f9cf293fe44a6d1",
+      "unchanged": true
+    }
+  },
+  "provenance_checks": {
+    "test_prediction_rows_exactly_aligned_to_test_csv": true,
+    "test_csv_hash_matches_final_config": true,
+    "checkpoint_hash_matches_final_config": true,
+    "threshold_matches_validation_selection_and_final_config": true,
+    "stored_predicted_labels_match_frozen_threshold": true,
+    "recomputed_primary_metrics_match_canonical_metrics": true,
+    "model_inference_performed": false
+  },
+  "cross_split_overlap": {
+    "train_vs_validation": {
+      "by_identifier": {
+        "doi": {
+          "unique_normalized_identifiers": 152,
+          "affected_train_rows": 152,
+          "affected_validation_rows": 152
+        },
+        "pmid": {
+          "unique_normalized_identifiers": 146,
+          "affected_train_rows": 146,
+          "affected_validation_rows": 146
+        },
+        "openalex_id": {
+          "unique_normalized_identifiers": 168,
+          "affected_train_rows": 168,
+          "affected_validation_rows": 168
+        }
+      },
+      "any_exact_identifier": {
+        "affected_train_rows": 169,
+        "affected_validation_rows": 169,
+        "identifier_linked_article_components": 169
+      }
+    },
+    "train_vs_test": {
+      "by_identifier": {
+        "doi": {
+          "unique_normalized_identifiers": 1340,
+          "affected_train_rows": 1394,
+          "affected_test_rows": 1343
+        },
+        "pmid": {
+          "unique_normalized_identifiers": 1027,
+          "affected_train_rows": 1052,
+          "affected_test_rows": 1030
+        },
+        "openalex_id": {
+          "unique_normalized_identifiers": 1356,
+          "affected_train_rows": 1410,
+          "affected_test_rows": 1359
+        }
+      },
+      "any_exact_identifier": {
+        "affected_train_rows": 1411,
+        "affected_test_rows": 1360,
+        "identifier_linked_article_components": 1357
+      }
+    },
+    "validation_vs_test": {
+      "by_identifier": {
+        "doi": {
+          "unique_normalized_identifiers": 646,
+          "affected_validation_rows": 646,
+          "affected_test_rows": 646
+        },
+        "pmid": {
+          "unique_normalized_identifiers": 11,
+          "affected_validation_rows": 11,
+          "affected_test_rows": 11
+        },
+        "openalex_id": {
+          "unique_normalized_identifiers": 655,
+          "affected_validation_rows": 655,
+          "affected_test_rows": 655
+        }
+      },
+      "any_exact_identifier": {
+        "affected_validation_rows": 655,
+        "affected_test_rows": 655,
+        "identifier_linked_article_components": 655
+      }
+    }
+  },
+  "test_identity_classification": {
+    "confirmed_overlap": {
+      "rows": 2012,
+      "percentage": 0.0852831468294337,
+      "positive": 40,
+      "negative": 1972
+    },
+    "confirmed_non_overlap": {
+      "rows": 21580,
+      "percentage": 0.9147168531705663,
+      "positive": 432,
+      "negative": 21148
+    },
+    "identity_unknown": {
+      "rows": 0,
+      "percentage": 0.0,
+      "positive": 0,
+      "negative": 0
+    }
+  },
+  "confirmed_overlap_sources": {
+    "train_only": 1357,
+    "validation_only": 652,
+    "both_train_and_validation": 3
+  },
+  "label_conflict_analysis": {
+    "train_test": {
+      "overlap_rows": 1360,
+      "same_label_rows": 1343,
+      "conflicting_label_rows": 20,
+      "same_only_rows": 1340,
+      "conflicting_only_rows": 17,
+      "both_same_and_conflicting_rows": 3
+    },
+    "validation_test": {
+      "overlap_rows": 655,
+      "same_label_rows": 589,
+      "conflicting_label_rows": 66,
+      "same_only_rows": 589,
+      "conflicting_only_rows": 66,
+      "both_same_and_conflicting_rows": 0
+    }
+  },
+  "malformed_identifier_rows": 19,
+  "identifier_conflict_records": 34,
+  "false_negative_count": 2,
+  "sanity_checks": {
+    "identity_groups_sum_to_test_n": true,
+    "strict_subset_has_no_exact_normalized_identifier_overlap": true,
+    "undefined_metrics_are_serialized_as_null": true,
+    "canonical_inputs_unchanged_during_analysis": true
+  }
+}

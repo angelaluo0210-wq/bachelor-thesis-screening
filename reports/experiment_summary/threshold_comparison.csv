@@ -1,0 +1,4 @@
+target_recall,threshold,tp,fp,tn,fn,recall,fnr,precision,specificity,predicted_include_rate,workload_reduction,selection_status,source_file
+0.90,0.025313053,373,14845,7138,41,0.9009661836,0.0990338164,0.0245104482,0.3247054542,0.6794659999,0.3205340001,formal_alternative,results/formal_training_strategy_20260910/thresholds/validation_threshold_recall_090.json
+0.95,0.016082723,394,15632,6351,20,0.9516908213,0.0483091787,0.0245850493,0.2889050630,0.7155422601,0.2844577399,selected,results/formal_training_strategy_20260910/thresholds/selected_validation_threshold.json
+0.98,0.007832554,406,16711,5272,8,0.9806763285,0.0193236715,0.0237191097,0.2398216804,0.7642541412,0.2357458588,formal_alternative,results/formal_training_strategy_20260910/thresholds/validation_threshold_recall_098.json

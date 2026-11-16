@@ -53,8 +53,20 @@ def prompt_fingerprint() -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def build_prompt(content: ReconstructedInput) -> str:
+def build_prompt_fields(*, inclusion: str, exclusion: str, title: str, abstract: str) -> str:
+    """Render the frozen prompt with already-selected field text.
+
+    This is intentionally shared by the legacy reconstructed-input path and
+    the full-source-text comparison path: the prompt instructions themselves
+    must not become an experimental variable.
+    """
     return PROMPT_TEMPLATE.format(
+        inclusion=inclusion, exclusion=exclusion, title=title, abstract=abstract,
+    )
+
+
+def build_prompt(content: ReconstructedInput) -> str:
+    return build_prompt_fields(
         inclusion=content.inclusion, exclusion=content.exclusion,
         title=content.title, abstract=content.abstract,
     )

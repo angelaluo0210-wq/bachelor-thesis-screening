@@ -1,0 +1,10 @@
+experiment_id,experiment_class,data_split,pooling,strategy,learning_rate,best_epoch,validation_ap,roc_auc,recall_at_0_5,precision_at_0_5,f1_at_0_5,trainable_parameters,source_file
+pooling_cls,formal,validation,CLS,frozen_encoder,0.0001,1,0.0943748762,0.6766961559,0.5845410628,0.0292058895,0.0556321839,769,outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv
+pooling_concat,formal,validation,Concatenated,frozen_encoder,0.0001,1,0.0909413137,0.7234961535,0.5724637681,0.0428648942,0.0797576981,1537,outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv
+pooling_mean,formal,validation,Mean,frozen_encoder,0.0001,5,0.0391426239,0.6571500903,0.6763285024,0.0239952010,0.0463461061,769,outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv
+pooling_attention,formal,validation,Attention,frozen_encoder,0.0001,3,0.0387204552,0.6364988119,0.4154589372,0.0366581415,0.0673717195,590593,outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv
+head_only,formal,validation,CLS,classifier_head_only,0.0001,2,0.0892453746,0.6800036633,0.6207729469,0.0269929629,0.0517362859,769,results/formal_training_strategy_20260910/classifier_head_only/metrics.json
+partial_unfreeze_1e-5,formal,validation,CLS,partial_unfreezing,backbone=0.00001;head=0.0001,2,0.0552799995,0.7392162499,0.4468599034,0.0464357430,0.0841291496,14176513,results/formal_training_strategy_20260910/partial_unfreezing_1e-5/metrics.json
+partial_unfreeze_2e-5,formal,validation,CLS,partial_unfreezing,backbone=0.00002;head=0.0001,2,0.0551675526,0.7388801316,0.3864734300,0.0458715596,0.0820092260,14176513,results/formal_training_strategy_20260910/partial_unfreezing_2e-5/metrics.json
+lora_5e-5_selected,formal,validation,CLS,LoRA,adapter=0.00005;head=0.0001,4,0.1900547578,0.7569747022,0.5797101449,0.0588957055,0.1069280463,295681,results/formal_training_strategy_20260910/lora_5e-5/metrics.json
+lora_1e-4,formal,validation,CLS,LoRA,adapter=0.0001;head=0.0001,1,0.1579164593,0.7596720060,0.5072463768,0.0843373494,0.1446280992,295681,results/formal_training_strategy_20260910/lora_1e-4/metrics.json

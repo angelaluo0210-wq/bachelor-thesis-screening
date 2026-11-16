@@ -1,0 +1,182 @@
+{
+  "source_root": "supplementary_202610",
+  "test_metrics_included": false,
+  "rows": 6,
+  "aggregate": {
+    "('pr_auc', 'count')": {
+      "('cls', 'lora', 'unweighted')": 1,
+      "('cls', 'lora', 'weighted')": 2,
+      "('mean', 'lora', 'weighted')": 3
+    },
+    "('pr_auc', 'mean')": {
+      "('cls', 'lora', 'unweighted')": 0.1129269654,
+      "('cls', 'lora', 'weighted')": 0.1521879992,
+      "('mean', 'lora', 'weighted')": 0.0748636163
+    },
+    "('pr_auc', 'std')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": 0.0384433646,
+      "('mean', 'lora', 'weighted')": 0.0136092573
+    },
+    "('pr_auc', 'min')": {
+      "('cls', 'lora', 'unweighted')": 0.1129269654,
+      "('cls', 'lora', 'weighted')": 0.1250044354,
+      "('mean', 'lora', 'weighted')": 0.0596428189
+    },
+    "('pr_auc', 'max')": {
+      "('cls', 'lora', 'unweighted')": 0.1129269654,
+      "('cls', 'lora', 'weighted')": 0.1793715631,
+      "('mean', 'lora', 'weighted')": 0.08585889
+    },
+    "('roc_auc', 'count')": {
+      "('cls', 'lora', 'unweighted')": 0,
+      "('cls', 'lora', 'weighted')": 0,
+      "('mean', 'lora', 'weighted')": 0
+    },
+    "('roc_auc', 'mean')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('roc_auc', 'std')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('roc_auc', 'min')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('roc_auc', 'max')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('recall', 'count')": {
+      "('cls', 'lora', 'unweighted')": 0,
+      "('cls', 'lora', 'weighted')": 0,
+      "('mean', 'lora', 'weighted')": 0
+    },
+    "('recall', 'mean')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('recall', 'std')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('recall', 'min')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('recall', 'max')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('precision', 'count')": {
+      "('cls', 'lora', 'unweighted')": 0,
+      "('cls', 'lora', 'weighted')": 0,
+      "('mean', 'lora', 'weighted')": 0
+    },
+    "('precision', 'mean')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('precision', 'std')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('precision', 'min')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('precision', 'max')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('fnr', 'count')": {
+      "('cls', 'lora', 'unweighted')": 0,
+      "('cls', 'lora', 'weighted')": 0,
+      "('mean', 'lora', 'weighted')": 0
+    },
+    "('fnr', 'mean')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('fnr', 'std')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('fnr', 'min')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('fnr', 'max')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('f1', 'count')": {
+      "('cls', 'lora', 'unweighted')": 0,
+      "('cls', 'lora', 'weighted')": 0,
+      "('mean', 'lora', 'weighted')": 0
+    },
+    "('f1', 'mean')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('f1', 'std')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('f1', 'min')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('f1', 'max')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('workload_reduction', 'count')": {
+      "('cls', 'lora', 'unweighted')": 0,
+      "('cls', 'lora', 'weighted')": 0,
+      "('mean', 'lora', 'weighted')": 0
+    },
+    "('workload_reduction', 'mean')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('workload_reduction', 'std')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('workload_reduction', 'min')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    },
+    "('workload_reduction', 'max')": {
+      "('cls', 'lora', 'unweighted')": null,
+      "('cls', 'lora', 'weighted')": null,
+      "('mean', 'lora', 'weighted')": null
+    }
+  }
+}

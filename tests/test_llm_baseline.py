@@ -21,13 +21,14 @@ from src.llm_baseline.alignment import validate_one_to_one_alignment
 from src.llm_baseline.client import QwenClient, QwenConfig
 from src.llm_baseline.evaluation import (apply_screening_policy, evaluate_policy_records,
                                          evaluate_resolved_records, hard_decision_metrics, wilson_interval)
-from src.llm_baseline.prompt import build_prompt, parse_response, prompt_fingerprint
+from src.llm_baseline.prompt import build_prompt, build_prompt_fields, parse_response, prompt_fingerprint
 from src.llm_baseline.records import (append_prediction, completed_record_ids,
                                       configuration_fingerprint, create_or_resume_run,
                                       record_id_for_row, require_unique_record_ids, stable_record_id)
 from src.llm_baseline.reconstruction import reconstruct_input
 from src.llm_baseline.runner import reconstruction_audit
 from scripts import run_qwen_baseline
+from scripts.run_qwen_full_input_validation_comparison import conservative_context_audit
 
 
 @pytest.fixture()
@@ -78,6 +79,14 @@ def test_boundary_prompt_and_parser(tokenizer):
     assert parse_response("exclude").status == "malformed"
 
 
+def test_full_and_reconstructed_paths_share_the_exact_prompt_template(tokenizer):
+    content = reconstruct_input(tokenizer, row(), 512)
+    assert build_prompt(content) == build_prompt_fields(
+        inclusion=content.inclusion, exclusion=content.exclusion,
+        title=content.title, abstract=content.abstract,
+    )
+
+
 def test_four_field_caps_fill_the_512_token_sequence(tokenizer):
     content = reconstruct_input(tokenizer, row(_inclusion_text="long " * 400,
                                                 _exclusion_text="long " * 400,
@@ -116,6 +125,20 @@ def test_mock_client_parses_and_retries_without_network():
     assert retries == 1 and error is None
     assert transport.payloads[0][2]["enable_thinking"] is False
     assert transport.payloads[0][2]["response_format"] == {"type": "json_object"}
+
+
+def test_client_adds_max_tokens_only_when_explicitly_configured():
+    client = QwenClient(QwenConfig(max_tokens=128), MockTransport([]), api_key="synthetic")
+    assert client.request_payload("prompt")["max_tokens"] == 128
+    assert "max_tokens" not in QwenClient(QwenConfig(), MockTransport([]), api_key="synthetic").request_payload("prompt")
+
+
+def test_conservative_context_guard_is_not_a_surrogate_token_count():
+    audit = conservative_context_audit("café")
+    assert audit["method"] == "utf8_bytes_plus_chat_allowance_not_token_count"
+    assert audit["prompt_utf8_bytes"] == len("café".encode("utf-8"))
+    with pytest.raises(ValueError, match="refusing request"):
+        conservative_context_audit("x" * 900_000)
 
 
 def test_client_retries_malformed_json_but_not_uncertain():

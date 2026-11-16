@@ -1,0 +1,46 @@
+{
+  "experiment": "pubmedbert_vs_qwen_full_test_subset",
+  "phase": "prepared_not_executed",
+  "sample_manifest_sha256": "a33d1477ca96f124d91f7a6559f707afa3bf2017364cadc1cffd4bd2d2338539",
+  "pubmedbert": {
+    "historical_prediction_path": "C:\\Users\\86150\\Desktop\\论文代码\\outputs\\final_test\\final_test_predictions.csv",
+    "historical_prediction_sha256": "1ccdbb13d577e5369da4f21e61138ef052f49e91127f32674f6800e9710af876",
+    "final_config_path": "C:\\Users\\86150\\Desktop\\论文代码\\outputs\\final_test\\final_test_config.json",
+    "selected_checkpoint": "outputs/training_strategy_comparison/20260910_150708_3f3f0eb0/lora/adapter_lr_5e-5/lora/seed_42/cls/run_20260910_191547/best_pr_auc_classifier_head.pt",
+    "checkpoint_sha256": "f635ed339a6902d4f2c695b27baf3ed977813c1fa361c9b61f9cf293fe44a6d1",
+    "threshold": 0.016082723,
+    "max_length": 512
+  },
+  "qwen": {
+    "mode": "full",
+    "api": {
+      "model": "qwen3.8-flash",
+      "base_url": "https://ws-b72yc4qdpbcg0dpv.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+      "temperature": 0.0,
+      "enable_thinking": false,
+      "stream": false,
+      "request_json_object": true,
+      "max_retries": 3,
+      "max_tokens": 128
+    },
+    "prompt_version": "qwen-zero-shot-screening-v2",
+    "prompt_sha256": "92d5ec3e57208464fdfafece65202a68d3363b790a64a9821cdfdc335317625a",
+    "screening_policy": "retain_unresolved_v1",
+    "requests_per_minute": 30.0,
+    "context_check": {
+      "method": "utf8_bytes_plus_chat_allowance_not_token_count",
+      "safe_limit_bytes": 900000
+    }
+  },
+  "inputs": {
+    "test.csv": "23728ed5139430ee3531b4432a2acadcd49aff8c3d4180fa50f53b082e7ab658",
+    "criteria.xlsx": "7a682824979cf65fec650ba31f6375637a2fe0fb24e7d979b66d5cb55b369b7c"
+  },
+  "source": {
+    "git_commit": "150c1334e5f1e35a127b246bcdbb24d971c0c7b1",
+    "git_worktree_dirty": true
+  },
+  "runtime": {
+    "python": "3.12.4"
+  }
+}

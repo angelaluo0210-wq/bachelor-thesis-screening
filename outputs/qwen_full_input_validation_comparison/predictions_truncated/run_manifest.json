@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-11-12T14:41:30.316201+00:00",
+  "configuration": {
+    "phase": "validation_comparison_execution",
+    "mode": "truncated",
+    "records": 5000,
+    "qwen_context_window": 991808,
+    "context_check": {
+      "method": "utf8_bytes_plus_chat_allowance_not_token_count",
+      "safe_limit_bytes": 900000
+    },
+    "api": {
+      "model": "qwen3.8-flash",
+      "base_url": "https://ws-b72yc4qdpbcg0dpv.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+      "temperature": 0.0,
+      "enable_thinking": false,
+      "stream": false,
+      "request_json_object": true,
+      "max_retries": 3,
+      "max_tokens": 128
+    },
+    "requests_per_minute": 30.0,
+    "difference_from_legacy_test": {
+      "max_tokens": {
+        "legacy": null,
+        "comparison": 128
+      }
+    },
+    "technical_selection_record_ids": null
+  },
+  "configuration_fingerprint": "7771c532fbcd3204843961bad81fe780e4cafa0d690672308345ad4750bd9d84",
+  "prediction_file": "predictions.jsonl",
+  "test_access": "forbidden",
+  "test_evaluated": false
+}

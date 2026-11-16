@@ -49,12 +49,14 @@ class QwenConfig:
     stream: bool = False
     request_json_object: bool = True
     max_retries: int = 3
+    max_tokens: int | None = None
 
     def public_dict(self) -> dict[str, Any]:
         return {
             "model": self.model, "base_url": self.base_url, "temperature": self.temperature,
             "enable_thinking": self.enable_thinking, "stream": self.stream,
             "request_json_object": self.request_json_object, "max_retries": self.max_retries,
+            "max_tokens": self.max_tokens,
         }
 
 
@@ -76,6 +78,8 @@ class QwenClient:
         }
         if self.config.request_json_object:
             payload["response_format"] = {"type": "json_object"}
+        if self.config.max_tokens is not None:
+            payload["max_tokens"] = self.config.max_tokens
         return payload
 
     def classify(self, prompt: str) -> tuple[ParsedDecision, dict[str, Any] | None]:

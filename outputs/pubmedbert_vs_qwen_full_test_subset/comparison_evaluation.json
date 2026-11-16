@@ -1,0 +1,503 @@
+{
+  "pubmedbert": {
+    "tp": 100,
+    "tn": 1141,
+    "fp": 3759,
+    "fn": 0,
+    "recall": 1.0,
+    "precision": 0.025913449080072558,
+    "f1": 0.05051780752715332,
+    "fnr": 0.0,
+    "specificity": 0.23285714285714285,
+    "npv": 1.0,
+    "predicted_include_rate": 0.7718,
+    "workload_reduction": 0.22819999999999996,
+    "accuracy": 0.2482,
+    "threshold": 0.016082723,
+    "pr_auc": null,
+    "roc_auc": null,
+    "score_type": "frozen_historical_probability_threshold",
+    "confidence_intervals": {
+      "recall": {
+        "estimate": 1.0,
+        "lower": 0.9630065017930143,
+        "upper": 1.0,
+        "n": 100
+      },
+      "fnr": {
+        "estimate": 0.0,
+        "lower": 3.469446951953614e-18,
+        "upper": 0.03699349820698568,
+        "n": 100
+      },
+      "precision": {
+        "estimate": 0.025913449080072558,
+        "lower": 0.021352566665801966,
+        "upper": 0.031417256013621664,
+        "n": 3859
+      },
+      "workload_reduction": {
+        "estimate": 0.2282,
+        "lower": 0.21677874907602035,
+        "upper": 0.2400385737013127,
+        "n": 5000
+      }
+    }
+  },
+  "qwen_full": {
+    "tp": 47,
+    "tn": 4558,
+    "fp": 342,
+    "fn": 53,
+    "recall": 0.47,
+    "precision": 0.12082262210796915,
+    "f1": 0.19222903885480572,
+    "fnr": 0.53,
+    "specificity": 0.9302040816326531,
+    "npv": 0.9885057471264368,
+    "predicted_include_rate": 0.0778,
+    "workload_reduction": 0.9222,
+    "accuracy": 0.921,
+    "threshold": null,
+    "pr_auc": null,
+    "roc_auc": null,
+    "score_type": "categorical_policy_exclude_is_auto_exclude",
+    "confidence_intervals": {
+      "recall": {
+        "estimate": 0.47,
+        "lower": 0.3751081795934127,
+        "upper": 0.5671114302990063,
+        "n": 100
+      },
+      "fnr": {
+        "estimate": 0.53,
+        "lower": 0.4328885697009936,
+        "upper": 0.6248918204065872,
+        "n": 100
+      },
+      "precision": {
+        "estimate": 0.12082262210796915,
+        "lower": 0.09208851071326328,
+        "upper": 0.15697241863572436,
+        "n": 389
+      },
+      "workload_reduction": {
+        "estimate": 0.9222,
+        "lower": 0.9144471825113035,
+        "upper": 0.9293045699662904,
+        "n": 5000
+      }
+    }
+  },
+  "positive_records": 100,
+  "natural_test_positive_rate_note": 0.020006781959986435,
+  "recall_ci_wilson": {
+    "pubmedbert": {
+      "estimate": 1.0,
+      "lower": 0.9630065017930143,
+      "upper": 1.0,
+      "n": 100
+    },
+    "qwen_full": {
+      "estimate": 0.47,
+      "lower": 0.3751081795934127,
+      "upper": 0.5671114302990063,
+      "n": 100
+    }
+  },
+  "positive_retention_pairing": {
+    "both_correctly_retained": 47,
+    "only_pubmedbert_correctly_retained": 53,
+    "only_qwen_correctly_retained": 0,
+    "both_false_negative": 0,
+    "mcnemar_exact_two_sided_p": 2.220446049250313e-16
+  },
+  "per_review": [
+    {
+      "review_key": "Leenaars_2019",
+      "records": 1232,
+      "positives": 4,
+      "pubmedbert": {
+        "tp": 4,
+        "tn": 318,
+        "fp": 910,
+        "fn": 0,
+        "recall": 1.0,
+        "precision": 0.00437636761487965,
+        "f1": 0.008714596949891068,
+        "fnr": 0.0,
+        "specificity": 0.25895765472312704,
+        "npv": 1.0,
+        "predicted_include_rate": 0.7418831168831169,
+        "workload_reduction": 0.2581168831168831,
+        "accuracy": 0.26136363636363635,
+        "threshold": 0.016082723,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "frozen_historical_probability_threshold",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 1.0,
+            "lower": 0.5101091635454027,
+            "upper": 1.0,
+            "n": 4
+          },
+          "fnr": {
+            "estimate": 0.0,
+            "lower": 0.0,
+            "upper": 0.4898908364545973,
+            "n": 4
+          },
+          "precision": {
+            "estimate": 0.00437636761487965,
+            "lower": 0.0017031604273424717,
+            "upper": 0.011198260299401387,
+            "n": 914
+          },
+          "workload_reduction": {
+            "estimate": 0.25811688311688313,
+            "lower": 0.23445981383610484,
+            "upper": 0.2832776793139186,
+            "n": 1232
+          }
+        }
+      },
+      "qwen_full": {
+        "tp": 4,
+        "tn": 1144,
+        "fp": 84,
+        "fn": 0,
+        "recall": 1.0,
+        "precision": 0.045454545454545456,
+        "f1": 0.08695652173913043,
+        "fnr": 0.0,
+        "specificity": 0.9315960912052117,
+        "npv": 1.0,
+        "predicted_include_rate": 0.07142857142857142,
+        "workload_reduction": 0.9285714285714286,
+        "accuracy": 0.9318181818181818,
+        "threshold": null,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "categorical_policy_exclude_is_auto_exclude",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 1.0,
+            "lower": 0.5101091635454027,
+            "upper": 1.0,
+            "n": 4
+          },
+          "fnr": {
+            "estimate": 0.0,
+            "lower": 0.0,
+            "upper": 0.4898908364545973,
+            "n": 4
+          },
+          "precision": {
+            "estimate": 0.045454545454545456,
+            "lower": 0.01781624923590725,
+            "upper": 0.11111744773217658,
+            "n": 88
+          },
+          "workload_reduction": {
+            "estimate": 0.9285714285714286,
+            "lower": 0.9128190601641871,
+            "upper": 0.941659475462617,
+            "n": 1232
+          }
+        }
+      }
+    },
+    {
+      "review_key": "Muthu_2021",
+      "records": 576,
+      "positives": 71,
+      "pubmedbert": {
+        "tp": 71,
+        "tn": 4,
+        "fp": 501,
+        "fn": 0,
+        "recall": 1.0,
+        "precision": 0.12412587412587413,
+        "f1": 0.2208398133748056,
+        "fnr": 0.0,
+        "specificity": 0.007920792079207921,
+        "npv": 1.0,
+        "predicted_include_rate": 0.9930555555555556,
+        "workload_reduction": 0.00694444444444442,
+        "accuracy": 0.13020833333333334,
+        "threshold": 0.016082723,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "frozen_historical_probability_threshold",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 1.0,
+            "lower": 0.9486720478031097,
+            "upper": 1.0,
+            "n": 71
+          },
+          "fnr": {
+            "estimate": 0.0,
+            "lower": 0.0,
+            "upper": 0.05132795219689034,
+            "n": 71
+          },
+          "precision": {
+            "estimate": 0.12412587412587413,
+            "lower": 0.09958610135371644,
+            "upper": 0.15368058618103142,
+            "n": 572
+          },
+          "workload_reduction": {
+            "estimate": 0.006944444444444444,
+            "lower": 0.0027037761510421265,
+            "upper": 0.01771811442018019,
+            "n": 576
+          }
+        }
+      },
+      "qwen_full": {
+        "tp": 23,
+        "tn": 445,
+        "fp": 60,
+        "fn": 48,
+        "recall": 0.323943661971831,
+        "precision": 0.27710843373493976,
+        "f1": 0.2987012987012987,
+        "fnr": 0.676056338028169,
+        "specificity": 0.8811881188118812,
+        "npv": 0.9026369168356998,
+        "predicted_include_rate": 0.1440972222222222,
+        "workload_reduction": 0.8559027777777778,
+        "accuracy": 0.8125,
+        "threshold": null,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "categorical_policy_exclude_is_auto_exclude",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 0.323943661971831,
+            "lower": 0.2265721171064956,
+            "upper": 0.4393884294417052,
+            "n": 71
+          },
+          "fnr": {
+            "estimate": 0.676056338028169,
+            "lower": 0.5606115705582948,
+            "upper": 0.7734278828935044,
+            "n": 71
+          },
+          "precision": {
+            "estimate": 0.27710843373493976,
+            "lower": 0.1923192775942012,
+            "upper": 0.38161694477631736,
+            "n": 83
+          },
+          "workload_reduction": {
+            "estimate": 0.8559027777777778,
+            "lower": 0.8248631451616172,
+            "upper": 0.8822266873485921,
+            "n": 576
+          }
+        }
+      }
+    },
+    {
+      "review_key": "Radjenovic_2013",
+      "records": 1258,
+      "positives": 10,
+      "pubmedbert": {
+        "tp": 10,
+        "tn": 79,
+        "fp": 1169,
+        "fn": 0,
+        "recall": 1.0,
+        "precision": 0.008481764206955046,
+        "f1": 0.01682085786375105,
+        "fnr": 0.0,
+        "specificity": 0.06330128205128205,
+        "npv": 1.0,
+        "predicted_include_rate": 0.9372019077901431,
+        "workload_reduction": 0.06279809220985688,
+        "accuracy": 0.07074721780604133,
+        "threshold": 0.016082723,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "frozen_historical_probability_threshold",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 1.0,
+            "lower": 0.7224672001371107,
+            "upper": 0.9999999999999999,
+            "n": 10
+          },
+          "fnr": {
+            "estimate": 0.0,
+            "lower": 0.0,
+            "upper": 0.2775327998628892,
+            "n": 10
+          },
+          "precision": {
+            "estimate": 0.008481764206955046,
+            "lower": 0.004613586758477718,
+            "upper": 0.015542503174711064,
+            "n": 1179
+          },
+          "workload_reduction": {
+            "estimate": 0.06279809220985691,
+            "lower": 0.050677539890926125,
+            "upper": 0.07758061622636435,
+            "n": 1258
+          }
+        }
+      },
+      "qwen_full": {
+        "tp": 10,
+        "tn": 1196,
+        "fp": 52,
+        "fn": 0,
+        "recall": 1.0,
+        "precision": 0.16129032258064516,
+        "f1": 0.2777777777777778,
+        "fnr": 0.0,
+        "specificity": 0.9583333333333334,
+        "npv": 1.0,
+        "predicted_include_rate": 0.0492845786963434,
+        "workload_reduction": 0.9507154213036566,
+        "accuracy": 0.958664546899841,
+        "threshold": null,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "categorical_policy_exclude_is_auto_exclude",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 1.0,
+            "lower": 0.7224672001371107,
+            "upper": 0.9999999999999999,
+            "n": 10
+          },
+          "fnr": {
+            "estimate": 0.0,
+            "lower": 0.0,
+            "upper": 0.2775327998628892,
+            "n": 10
+          },
+          "precision": {
+            "estimate": 0.16129032258064516,
+            "lower": 0.09004068870309086,
+            "upper": 0.2720633601397744,
+            "n": 62
+          },
+          "workload_reduction": {
+            "estimate": 0.9507154213036566,
+            "lower": 0.9373213761890943,
+            "upper": 0.9613652155954445,
+            "n": 1258
+          }
+        }
+      }
+    },
+    {
+      "review_key": "van_Dis_2020",
+      "records": 1934,
+      "positives": 15,
+      "pubmedbert": {
+        "tp": 15,
+        "tn": 740,
+        "fp": 1179,
+        "fn": 0,
+        "recall": 1.0,
+        "precision": 0.01256281407035176,
+        "f1": 0.02481389578163772,
+        "fnr": 0.0,
+        "specificity": 0.385617509119333,
+        "npv": 1.0,
+        "predicted_include_rate": 0.6173733195449845,
+        "workload_reduction": 0.38262668045501547,
+        "accuracy": 0.39038262668045504,
+        "threshold": 0.016082723,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "frozen_historical_probability_threshold",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 1.0,
+            "lower": 0.7961166989641515,
+            "upper": 1.0,
+            "n": 15
+          },
+          "fnr": {
+            "estimate": 0.0,
+            "lower": 0.0,
+            "upper": 0.20388330103584862,
+            "n": 15
+          },
+          "precision": {
+            "estimate": 0.01256281407035176,
+            "lower": 0.007627847518586255,
+            "upper": 0.02062418748278356,
+            "n": 1194
+          },
+          "workload_reduction": {
+            "estimate": 0.3826266804550155,
+            "lower": 0.36121843884329286,
+            "upper": 0.4045002694991897,
+            "n": 1934
+          }
+        }
+      },
+      "qwen_full": {
+        "tp": 10,
+        "tn": 1773,
+        "fp": 146,
+        "fn": 5,
+        "recall": 0.6666666666666666,
+        "precision": 0.0641025641025641,
+        "f1": 0.11695906432748537,
+        "fnr": 0.3333333333333333,
+        "specificity": 0.9239187076602398,
+        "npv": 0.9971878515185602,
+        "predicted_include_rate": 0.08066184074457083,
+        "workload_reduction": 0.9193381592554292,
+        "accuracy": 0.921923474663909,
+        "threshold": null,
+        "pr_auc": null,
+        "roc_auc": null,
+        "score_type": "categorical_policy_exclude_is_auto_exclude",
+        "confidence_intervals": {
+          "recall": {
+            "estimate": 0.6666666666666666,
+            "lower": 0.41713547738519774,
+            "upper": 0.8482367556028526,
+            "n": 15
+          },
+          "fnr": {
+            "estimate": 0.3333333333333333,
+            "lower": 0.1517632443971473,
+            "upper": 0.5828645226148023,
+            "n": 15
+          },
+          "precision": {
+            "estimate": 0.0641025641025641,
+            "lower": 0.03518858274470879,
+            "upper": 0.1139683318417555,
+            "n": 156
+          },
+          "workload_reduction": {
+            "estimate": 0.9193381592554292,
+            "lower": 0.9063540138287237,
+            "upper": 0.930659763855182,
+            "n": 1934
+          }
+        }
+      }
+    }
+  ],
+  "interpretation_note": "This is a stratified Test subset. Report its observed positive count and compare paired recalls; do not infer full-Test prevalence or causality from the subset alone.",
+  "qwen_usage": {
+    "prompt_tokens": 3788899,
+    "completion_tokens": 25455,
+    "estimated_cost_cny_cache_miss": 3.0998477
+  }
+}

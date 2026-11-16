@@ -1,0 +1,18 @@
+{
+  "expected_records": 23592,
+  "completed_records": 23592,
+  "missing_records": 0,
+  "extra_records": 0,
+  "outcome_counts": {
+    "api_transport_failure": 105,
+    "explicit_exclude": 21221,
+    "explicit_include": 868,
+    "uncertain": 1398
+  },
+  "token_usage_totals": {
+    "completion_tokens": 119999,
+    "prompt_tokens": 16851735,
+    "total_tokens": 16971734
+  },
+  "elapsed_seconds": 30647.265
+}

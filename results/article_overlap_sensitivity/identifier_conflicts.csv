@@ -1,0 +1,35 @@
+conflict_type,identifier_type,identifier_value,associated_values,splits,reviews,row_count,note
+malformed_identifier,doi,https://doi.org/10/cxbvn7,,train,Brouwer_2019,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10/ggxcxw,,train,Brouwer_2019,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10/fvvrm8,,train,Brouwer_2019,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10.231/jim.0b013e3181eb9895,,train,Leenaars_2020,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10/bh3qjf,,train,Smid_2020,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10/d6sxsf,,train,Smid_2020,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10676http://dx.doi.org/10.1016/j.revmed.2008.10.006,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/1099395/frame.html,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10576621,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,pmid,https://pubmed.ncbi.nlm.nih.gov/CMR-13432,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10703,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/1075188,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/1024,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/1046333/frame.html,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/1030848,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/10467504,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/104440,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/100/CN-00348100/frame.html,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+malformed_identifier,doi,https://doi.org/1095247,,train,Wolters_2018,1,Non-empty identifier excluded from exact matching by conservative validation.
+same_doi_multiple_pmids,doi,10.1371/journal.pone.0009514,20209086;20724818,train,Walker_2018,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,17033300,10.1097/00001574-200005000-00004;10.1097/00001574-200205000-00003,train,Appenzeller-Herzog_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,15728748,10.1097/00019442-200503000-00002;10.1176/appi.ajgp.13.3.180,train,Brouwer_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,16683976,10.1080/j.1440-1614.2006.01826.x;10.1111/j.1440-1614.2006.01826.x,train,Brouwer_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,30270423,10.1002/14651858.cd003968.pub4;10.1002/14651858.cd003968.pub5,train,Brouwer_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,16816220,10.1176/ajp.2006.163.7.1161;10.1176/appi.ajp.163.7.1161,train,Brouwer_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,28451963,10.1007/s40263-017-0417-0;10.1007/s40263-017-0435-y,train,Brouwer_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,28920563,10.1017/s0033291716002737;10.1017/s0033291717002720,train,Brouwer_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,25022442,10.1016/j.reuma.2014.05.002;10.1016/j.reumae.2014.05.002,train,Leenaars_2020,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,21925447,10.1016/j.reuma.2011.03.004;10.1016/j.reumae.2011.03.001,train,Leenaars_2020,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,31648296,10.1093/ibd/izz167;10.1093/ibd/izz271,train,Meijboom_2021,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,22000859,10.1016/j.bbr.2011.06.003;10.1016/j.bbr.2011.09.032,validation,Moran_2021,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,18206140,10.1016/j.ejphar.2007.10.020;10.1016/j.ejphar.2007.12.008,test,Leenaars_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,23559307,10.1002/0471142301.ns0704s48;10.1002/0471142301.ns0704s63,test,Leenaars_2019,2,Audited only; no bibliographic mapping was repaired.
+same_pmid_multiple_dois,pmid,24026170,10.1007/s00586-013-2905-3;10.1007/s00586-013-2986-z,test,Muthu_2021,2,Audited only; no bibliographic mapping was repaired.

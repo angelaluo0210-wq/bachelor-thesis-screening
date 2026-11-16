@@ -1,0 +1,28 @@
+experiment_id,status,date,dataset_or_split,model_or_baseline,configuration,result_artifacts,evidence_status,role
+DATA_QC,Completed,Unknown,processed corpus,Data preparation,"missing/duplicate/conflict/mojibake audits",reports/processed_data_summary.json;reports/duplicate_articles.csv,Artifact-present,quality control
+SPLIT_CANONICAL,Completed,Unknown,26-review corpus,Review split,"18 train;4 validation;4 test reviews",config/canonical_split.json,Artifact-present,design control
+POOL_CLS,Completed,2026-09-05,Validation,PubMedBERT frozen,"CLS;seed42",outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv,Verified,model selection
+POOL_CONCAT,Completed,2026-09-05,Validation,PubMedBERT frozen,"Concat;seed42",outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv,Verified,model selection
+POOL_MEAN,Completed,2026-09-05,Validation,PubMedBERT frozen,"Mean;seed42",outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv,Verified,model selection
+POOL_ATTENTION,Completed,2026-09-05,Validation,PubMedBERT frozen,"Attention;seed42",outputs/pooling_comparison/formal/20260905_122936/final_comparison.csv,Verified,model selection
+STRAT_HEAD,Completed,2026-09-10,Validation,PubMedBERT,"CLS;head only;seed42",results/formal_training_strategy_20260910/classifier_head_only/metrics.json,Verified,model selection
+STRAT_PARTIAL_1E5,Completed,2026-09-10,Validation,PubMedBERT,"CLS;partial unfreeze 1e-5;seed42",results/formal_training_strategy_20260910/partial_unfreezing_1e-5/metrics.json,Verified,model selection
+STRAT_PARTIAL_2E5,Completed,2026-09-10,Validation,PubMedBERT,"CLS;partial unfreeze 2e-5;seed42",results/formal_training_strategy_20260910/partial_unfreezing_2e-5/metrics.json,Verified,model selection
+STRAT_LORA_5E5,Completed,2026-09-10,Validation,PubMedBERT,"CLS;LoRA 5e-5;seed42;selected",results/formal_training_strategy_20260910/lora_5e-5/metrics.json,Verified,model selection
+STRAT_LORA_1E4,Completed,2026-09-10,Validation,PubMedBERT,"CLS;LoRA 1e-4;seed42",results/formal_training_strategy_20260910/lora_1e-4/metrics.json,Verified,model selection
+THRESHOLD_CALIBRATION,Completed,2026-09-10,Validation,PubMedBERT,"largest threshold recall>=.95;threshold=.016082723",results/formal_training_strategy_20260910/thresholds/selected_validation_threshold.json,Verified,threshold selection
+PUBMEDBERT_FINAL_TEST,Completed,2026-09-19,Test,PubMedBERT,"selected CLS-LoRA;frozen threshold .016082723;seed42",outputs/final_test/final_test_metrics.json,Verified,official final Test
+ARTICLE_OVERLAP,Completed,Unknown,Test strict non-overlap subset,PubMedBERT,"frozen scores and threshold",results/article_overlap_sensitivity/article_disjoint_metrics.json,Verified,post-hoc robustness
+ERROR_ANALYSIS,Completed,Unknown,Final-Test false negatives,PubMedBERT,"two FN case audit",results/final_error_analysis/error_analysis_summary.md,Verified,post-hoc error analysis
+TFIDF_TITLE_ABS,Completed,2026-10-28,Validation,TF-IDF Logistic Regression,"title+abstract;C=10;calibrated",supplementary_202610/tfidf_logreg/baseline_a_title_abstract/validation_metrics.json,Verified,baseline
+TFIDF_CRITERIA,Completed,2026-10-28,Validation,TF-IDF Logistic Regression,"criteria+title+abstract;C=10;calibrated",supplementary_202610/tfidf_logreg/baseline_b_criteria_title_abstract/validation_metrics.json,Verified,baseline
+MEAN_LORA_SEEDS,Completed,2026-10-28,Validation,PubMedBERT,"mean LoRA;seeds 42/123/2026",supplementary_202610/mean_lora/20261028_085641_aaeca089/mean_lora_manifest.json,Verified,supplementary
+CLS_LORA_SEEDS,Completed,2026-10-28,Validation,PubMedBERT,"CLS LoRA;additional seeds 123/2026",supplementary_202610/cls_lora_multiseed/20261028_161144_dfbd2800,Verified,supplementary
+UNWEIGHTED_BCE,Completed,2026-10-28,Validation,PubMedBERT,"CLS LoRA;unweighted BCE;seed42",supplementary_202610/cls_lora_unweighted_bce/20261028_210437_bdbd9750,Verified,ablation
+QWEN_VALIDATION_PILOT,Completed,2026-10-28,Validation sample,Qwen3.8-Flash,"zero-shot;25 label-blind records",supplementary_202610/llm_baseline/validation_pilot_api_20261028/execution_summary.json,Verified,diagnostic only
+QWEN_POSITIVE_DIAGNOSTIC,Completed,2026-10-28,Validation positives,Qwen3.8-Flash,"zero-shot;12 known-positive records",supplementary_202610/llm_baseline/validation_positive_case_diagnostic_20261028/diagnostic_summary.json,Verified,diagnostic only
+QWEN_FULL_TEST,Completed,2026-10-29,Test,Qwen3.8-Flash,"zero-shot;retain_unresolved_v1;23,592 records",results/qwen_final_test/qwen_final_test_metrics.json,Verified,full Test comparison
+QWEN_FN_AUDIT,Partial,2026-11-04,Qwen full-Test false negatives,Qwen3.8-Flash,"post-hoc FN categorization; 11/236 individually reviewed",reports/qwen_fn_audit_20261104/audit_report.md,Verified-as-partial,post-hoc error analysis
+QWEN_FULL_SUBSET,Completed,2026-11-13,Stratified 5000-record Test subset,Qwen3.8-Flash,"zero-shot;label-stratified sample",outputs/pubmedbert_vs_qwen_full_test_subset/comparison_evaluation.json,Verified,exploratory paired subset
+PRECISION_MATCHED,Completed,2026-11-13,Same 5000-record Test subset,PubMedBERT,"post-hoc threshold .85556966 matched to Qwen precision",outputs/pubmedbert_vs_qwen_full_test_subset/precision_matched_comparison/precision_matched_summary.json,Verified,post-hoc exploratory
+SMOKE_AND_PREFLIGHT,Completed,Various,Smoke/preflight,Multiple,"non-performance checks",outputs/strategy_verification; supplementary_202610/autodl_validation,Artifact-present,not performance evidence
