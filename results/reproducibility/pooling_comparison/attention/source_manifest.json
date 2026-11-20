@@ -1,0 +1,27 @@
+{
+  "experiment_id": "POOL-ATTENTION",
+  "source_files_sha256": {
+    "config.json": "d3021d458b7edc431082ffdc0e883586eb1ecfa312c89509bbd01923fc447ce2",
+    "validation_predictions.csv": "4ddd6dcd0d3eb4ddcd5a44b2242a22d8409f116513135d9343db50afad83cf43",
+    "metrics.json": "84d719769f4c09176ce259060851193b158ec5998ca349d436b51793f9f6abc1",
+    "run_summary.json": "72e1529e7097c0bda5cb3965784787360b8d38d72a101c0ad05fd3a8c1c70f89",
+    "run.log": "ef3986d84d5aacd0e143aa951b1545cb44cdae87fe7262d2025343bd73b2f643",
+    "training_history.csv": "e77019295e290729be39abced044de6b24fe1c36fc0093ba0a1637b169354b99",
+    "per_review_validation_metrics.csv": "1f8d6e0bf50bc2456a9517811fc66d5bf0c8a6779985414a88fa2dc8126282b7",
+    "best_pr_auc_classifier_head.pt": "6c3e38d27d00009c506e63e3b70a9f5b54158f2451002232e671a1511e68cc78"
+  },
+  "source_files": {
+    "config.json": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/config.json",
+    "validation_predictions.csv": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/validation_predictions.csv",
+    "metrics.json": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/metrics.json",
+    "run_summary.json": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/run_summary.json",
+    "run.log": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/run.log",
+    "training_history.csv": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/training_history.csv",
+    "per_review_validation_metrics.csv": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/per_review_validation_metrics.csv",
+    "best_pr_auc_classifier_head.pt": "outputs/pooling_comparison/formal/20260905_122936/attention/run_20260905_141749/best_pr_auc_classifier_head.pt"
+  },
+  "public_copy_note": "Config, summary and log have paths/tokens redacted; prediction copy omits title and external identifiers but retains frozen Validation row index. Metrics, history and per-review CSVs are exact copies.",
+  "validation_source_path": "data/processed/splits/validation.csv",
+  "validation_source_sha256": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12",
+  "checkpoint_not_copied": true
+}

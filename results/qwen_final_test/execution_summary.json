@@ -1,0 +1,22 @@
+{
+  "configuration_fingerprint": "083e5a9e0eb36f272c22337def0a52f5cfade7e619057d8393958b1f95520119",
+  "test_evaluated": true,
+  "complete_population_verified": true,
+  "expected_records": 23592,
+  "completed_records": 23592,
+  "missing_records": 0,
+  "extra_records": 0,
+  "outcome_counts": {
+    "api_transport_failure": 105,
+    "explicit_exclude": 21221,
+    "explicit_include": 868,
+    "uncertain": 1398
+  },
+  "token_usage_totals": {
+    "completion_tokens": 119999,
+    "prompt_tokens": 16851735,
+    "total_tokens": 16971734
+  },
+  "elapsed_seconds": 30647.93699999999,
+  "supplementary_paired_analysis": "not_requested"
+}

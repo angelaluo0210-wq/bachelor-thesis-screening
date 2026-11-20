@@ -1,0 +1,26 @@
+{
+  "status": "partial_preflight_passed",
+  "split": "validation",
+  "rows_checked": 4,
+  "row_range_zero_based": [
+    0,
+    3
+  ],
+  "max_absolute_probability_difference": 5.774972038283255e-07,
+  "comparison_tolerance": {
+    "rtol": 0.0002,
+    "atol": 2e-05
+  },
+  "probabilities_within_tolerance": true,
+  "full_validation_reproduction_complete": false,
+  "test_inference_started": false,
+  "local_base_model_sha256": "d513412d396cecec5f67936ac871b4aaf1178dfb5193776e790fd2b28bba240c",
+  "unweighted_checkpoint_sha256": "29e83b4b46c217dd8613363e5d73af208398b5caf7ace79126c4681685fa1764",
+  "runtime": {
+    "torch": "2.6.0+cpu",
+    "transformers": "5.16.1",
+    "peft": "0.20.0",
+    "device": "cpu"
+  },
+  "note": "Four Validation records were inferred with the local base model and the saved LoRA/head checkpoint. The full 22,397-row reproduction remains required before any Test inference."
+}

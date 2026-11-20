@@ -1,0 +1,4 @@
+system,decision_rule,threshold,precision_target,tp,fp,tn,fn,retained_for_manual_screening,precision,recall,fnr,f1,workload_reduction
+Qwen Full,exclude=0; include/uncertain=1,,True,47,342,4558,53,389,0.12082262210796915,0.47,0.53,0.19222903885480572,0.9222
+PubMedBERT + LoRA (original frozen threshold),predicted_probability >= threshold,0.016082723,False,100,3759,1141,0,3859,0.025913449080072558,1.0,0.0,0.050517807527153326,0.2282
+PubMedBERT + LoRA (precision-matched; post-hoc),predicted_probability >= threshold,0.85556966,True,76,553,4347,24,629,0.12082670906200318,0.76,0.24,0.2085048010973937,0.8742

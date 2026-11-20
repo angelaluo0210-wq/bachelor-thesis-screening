@@ -1,0 +1,74 @@
+{
+  "method": "hierarchical largest-remainder allocation: review size, then label distribution within review",
+  "random_seed": 42,
+  "target_records": 5000,
+  "test_by_review_label": {
+    "Leenaars_2019": {
+      "0": 5794,
+      "1": 17
+    },
+    "Muthu_2021": {
+      "0": 2383,
+      "1": 335
+    },
+    "Radjenovic_2013": {
+      "0": 5887,
+      "1": 48
+    },
+    "van_Dis_2020": {
+      "0": 9056,
+      "1": 72
+    }
+  },
+  "sample_by_review_label": {
+    "Leenaars_2019": {
+      "0": 1228,
+      "1": 4
+    },
+    "Muthu_2021": {
+      "0": 505,
+      "1": 71
+    },
+    "Radjenovic_2013": {
+      "0": 1248,
+      "1": 10
+    },
+    "van_Dis_2020": {
+      "0": 1919,
+      "1": 15
+    }
+  },
+  "review_quotas": {
+    "Leenaars_2019": 1232,
+    "Muthu_2021": 576,
+    "Radjenovic_2013": 1258,
+    "van_Dis_2020": 1934
+  },
+  "within_review_label_quotas": {
+    "Leenaars_2019": {
+      "0": 1228,
+      "1": 4
+    },
+    "Muthu_2021": {
+      "0": 505,
+      "1": 71
+    },
+    "Radjenovic_2013": {
+      "0": 1248,
+      "1": 10
+    },
+    "van_Dis_2020": {
+      "0": 1919,
+      "1": 15
+    }
+  },
+  "test_records": 23592,
+  "sample_records": 5000,
+  "reviews": [
+    "Leenaars_2019",
+    "Muthu_2021",
+    "Radjenovic_2013",
+    "van_Dis_2020"
+  ],
+  "sample_manifest_sha256": "a33d1477ca96f124d91f7a6559f707afa3bf2017364cadc1cffd4bd2d2338539"
+}

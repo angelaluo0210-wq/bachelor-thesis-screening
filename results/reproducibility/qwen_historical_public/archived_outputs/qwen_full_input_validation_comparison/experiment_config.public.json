@@ -1,0 +1,93 @@
+{
+  "experiment": "qwen_full_input_validation_comparison",
+  "phase": "prepared_not_executed",
+  "sample": {
+    "records": 5000,
+    "include": 300,
+    "exclude": 4700,
+    "seed": 42
+  },
+  "modes": {
+    "truncated": "frozen PubMedBERT token reconstruction at 512",
+    "full": "raw title/abstract and complete matched inclusion/exclusion criteria; no truncation"
+  },
+  "model": {
+    "model": "qwen3.8-flash",
+    "base_url": "<HISTORICAL_WORKSPACE_ENDPOINT_REDACTED>",
+    "temperature": 0.0,
+    "enable_thinking": false,
+    "stream": false,
+    "request_json_object": true,
+    "max_retries": 3,
+    "max_tokens": 128
+  },
+  "difference_from_legacy_test": {
+    "max_tokens": {
+      "legacy": null,
+      "comparison": 128
+    }
+  },
+  "prompt_version": "qwen-zero-shot-screening-v2",
+  "prompt_sha256": "92d5ec3e57208464fdfafece65202a68d3363b790a64a9821cdfdc335317625a",
+  "screening_policy": "retain_unresolved_v1",
+  "input_sha256": {
+    "validation.csv": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12",
+    "criteria.xlsx": "7a682824979cf65fec650ba31f6375637a2fe0fb24e7d979b66d5cb55b369b7c"
+  },
+  "tokenizer": {
+    "path": "<LOCAL_PROJECT_ROOT>\\model\\pubmedbert",
+    "files_sha256": {
+      "config.json": "56bab767c02bc792897638feb8addc06d483d9c73769a5f554bbabea1f5507a1",
+      "tokenizer_config.json": "53b6f42b8b8daddbdc6d3532c324187a92b46c1602bd6e8d4ad5a413b4fc90e1",
+      "vocab.txt": "7b36651908a88bc38bda41b728b2a598191e0d3b553cbacf7b1e5f026d5b5b9f"
+    },
+    "identity_sha256": "259df9b6b2080829ed89bd18bae0887439b547b1fa5991a359d096e7547fe3d5"
+  },
+  "runtime": {
+    "python": "3.12.4",
+    "transformers": "5.16.1"
+  },
+  "source": {
+    "git_commit": "150c1334e5f1e35a127b246bcdbb24d971c0c7b1",
+    "git_worktree_dirty": true
+  },
+  "qwen_context_window": {
+    "status": "verified against Alibaba Cloud Model Studio official qwen3.8-flash model information (checked 2026-11-12)",
+    "context_length_tokens": 1000000,
+    "max_input_tokens": 991808,
+    "max_output_tokens": 131072,
+    "thinking_mode": false,
+    "execution_guard": "The executor uses a conservative UTF-8-byte-plus-chat-envelope upper bound and refuses any over-limit input; it never truncates full text."
+  },
+  "estimated_requests": 10000,
+  "estimated_token_usage": {
+    "status": "pre-execution estimates calibrated from the completed same-model legacy run; exact billing usage remains the API usage field",
+    "calibration": {
+      "legacy_prompt_tokens": 16851735,
+      "legacy_completion_tokens": 119999,
+      "legacy_valid_usage_records": 23487,
+      "estimated_truncated_prompt_tokens": 3587460,
+      "estimated_full_prompt_tokens": 3893098,
+      "estimated_total_completion_tokens": 51092
+    },
+    "prompt_characters": {
+      "truncated": 16154649,
+      "full": 16531633,
+      "truncated_max": 4435,
+      "full_max": 25118
+    }
+  },
+  "cost_usd": null,
+  "_public_copy": {
+    "is_original_run_record": false,
+    "original_repository_path": "outputs/qwen_full_input_validation_comparison/experiment_config.json",
+    "original_sha256": "6eefcf1580ee3f01de43a501fcc1d433a8c5a5576a5b6f2c377aa526baaea0f4",
+    "historical_endpoint_sha256": "0fa08c5c67460200a7062be19ebf839ca466dfb7d5ed20700ee5e3d388064503",
+    "original_configuration_fingerprints": [],
+    "redactions": {
+      "endpoint": 1,
+      "windows_project_path": 1,
+      "windows_home_path": 0
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "manifest": {
+    "schema_version": 1,
+    "created_utc": "2026-10-29T13:43:46.234335+00:00",
+    "configuration": {
+      "experiment": "qwen3.8_flash_zero_shot",
+      "phase": "final_test",
+      "test_access": "explicitly_authorized",
+      "test_evaluated": false,
+      "model_name_or_path": "<LOCAL_PROJECT_ROOT>\\model\\pubmedbert",
+      "max_length": 512,
+      "prompt_version": "qwen-zero-shot-screening-v2",
+      "prompt_sha256": "92d5ec3e57208464fdfafece65202a68d3363b790a64a9821cdfdc335317625a",
+      "api": {
+        "model": "qwen3.8-flash",
+        "base_url": "<HISTORICAL_WORKSPACE_ENDPOINT_REDACTED>",
+        "temperature": 0.0,
+        "enable_thinking": false,
+        "stream": false,
+        "request_json_object": true,
+        "max_retries": 3
+      },
+      "requests_per_minute": 30.0,
+      "input_sha256": {
+        "test.csv": "23728ed5139430ee3531b4432a2acadcd49aff8c3d4180fa50f53b082e7ab658",
+        "criteria.xlsx": "7a682824979cf65fec650ba31f6375637a2fe0fb24e7d979b66d5cb55b369b7c"
+      },
+      "tokenizer": {
+        "path": "<LOCAL_PROJECT_ROOT>\\model\\pubmedbert",
+        "files_sha256": {
+          "config.json": "56bab767c02bc792897638feb8addc06d483d9c73769a5f554bbabea1f5507a1",
+          "tokenizer_config.json": "53b6f42b8b8daddbdc6d3532c324187a92b46c1602bd6e8d4ad5a413b4fc90e1",
+          "vocab.txt": "7b36651908a88bc38bda41b728b2a598191e0d3b553cbacf7b1e5f026d5b5b9f"
+        },
+        "identity_sha256": "259df9b6b2080829ed89bd18bae0887439b547b1fa5991a359d096e7547fe3d5"
+      },
+      "runtime": {
+        "python": "3.12.4",
+        "transformers": "5.16.1"
+      },
+      "source": {
+        "git_commit": "b45968fdd3eefd644083f672c6534216e3776c56",
+        "git_worktree_dirty": true
+      },
+      "population": {
+        "records": 23592,
+        "reviews": [
+          "Leenaars_2019",
+          "Muthu_2021",
+          "Radjenovic_2013",
+          "van_Dis_2020"
+        ],
+        "sampling": "forbidden"
+      }
+    },
+    "configuration_fingerprint": "bb62130895a2555e5d79e3e0fcfe2ed7ba8476ab8b7c4300c8a36b536fc0ed5a",
+    "prediction_file": "predictions.jsonl",
+    "test_access": "explicitly_authorized",
+    "test_evaluated": false
+  },
+  "configuration_fingerprint": "083e5a9e0eb36f272c22337def0a52f5cfade7e619057d8393958b1f95520119",
+  "test_evaluated": true,
+  "complete_population_verified": true,
+  "supplementary_paired_analysis": {
+    "paired_analysis": "not_requested",
+    "note": "PubMedBERT comparison metrics, if reported, come from its prior independent final Test evaluation; no paired error analysis was performed."
+  },
+  "expected_records": 23592,
+  "completed_records": 23592,
+  "missing_records": 0,
+  "extra_records": 0,
+  "outcome_counts": {
+    "api_transport_failure": 105,
+    "explicit_exclude": 21221,
+    "explicit_include": 868,
+    "uncertain": 1398
+  },
+  "token_usage_totals": {
+    "completion_tokens": 119999,
+    "prompt_tokens": 16851735,
+    "total_tokens": 16971734
+  },
+  "elapsed_seconds": 30647.93699999999,
+  "_public_copy": {
+    "is_original_run_record": false,
+    "original_repository_path": "supplementary_202610/llm_baseline/qwen_final_test_20261029/final_test_execution_summary.json",
+    "original_sha256": "53b5add32d3d84ff15045a50ba993f62057bd7e518505af3df2853125a716569",
+    "historical_endpoint_sha256": "0fa08c5c67460200a7062be19ebf839ca466dfb7d5ed20700ee5e3d388064503",
+    "original_configuration_fingerprints": [
+      "083e5a9e0eb36f272c22337def0a52f5cfade7e619057d8393958b1f95520119"
+    ],
+    "redactions": {
+      "endpoint": 1,
+      "windows_project_path": 2,
+      "windows_home_path": 0
+    }
+  }
+}

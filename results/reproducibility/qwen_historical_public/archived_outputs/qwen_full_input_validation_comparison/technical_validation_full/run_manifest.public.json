@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-11-12T14:36:22.748941+00:00",
+  "configuration": {
+    "phase": "technical_validation",
+    "mode": "full",
+    "records": 10,
+    "qwen_context_window": 991808,
+    "context_check": {
+      "method": "utf8_bytes_plus_chat_allowance_not_token_count",
+      "safe_limit_bytes": 900000
+    },
+    "api": {
+      "model": "qwen3.8-flash",
+      "base_url": "<HISTORICAL_WORKSPACE_ENDPOINT_REDACTED>",
+      "temperature": 0.0,
+      "enable_thinking": false,
+      "stream": false,
+      "request_json_object": true,
+      "max_retries": 3,
+      "max_tokens": 128
+    },
+    "difference_from_legacy_test": {
+      "max_tokens": {
+        "legacy": null,
+        "comparison": 128
+      }
+    },
+    "technical_selection_record_ids": [
+      "hall_2012|doi=https://doi.org/10.1109/promise.2007.9|openalex_id=https://openalex.org/w4239128575",
+      "hall_2012|doi=https://doi.org/10.1109/promise.2007.11|openalex_id=https://openalex.org/w2146947654",
+      "hall_2012|doi=https://doi.org/10.1109/icelmach.2008.4799852|openalex_id=https://openalex.org/w2111816457",
+      "moran_2021|pmid=https://pubmed.ncbi.nlm.nih.gov/30610916|doi=https://doi.org/10.1016/j.nbd.2018.11.026|openalex_id=https://openalex.org/w2907170302",
+      "moran_2021|doi=https://doi.org/10.1016/j.baae.2018.12.001|openalex_id=https://openalex.org/w2904838385",
+      "moran_2021|pmid=https://pubmed.ncbi.nlm.nih.gov/2006980|doi=https://doi.org/10.1016/0741-8329(91)91168-2|openalex_id=https://openalex.org/w1993284186",
+      "van_der_valk_2021|doi=https://doi.org/10.3760/cma.j.issn.0253-9624.2017.12.003|openalex_id=https://openalex.org/w3007422315",
+      "van_der_valk_2021|doi=https://doi.org/10.1016/j.bbi.2019.02.015|openalex_id=https://openalex.org/w2916045490",
+      "wassenaar_2017|pmid=https://pubmed.ncbi.nlm.nih.gov/24225091|doi=https://doi.org/10.2166/wst.2013.442|openalex_id=https://openalex.org/w2324068954",
+      "wassenaar_2017|pmid=https://pubmed.ncbi.nlm.nih.gov/24191495|doi=https://doi.org/10.1080/09593330.2012.760654|openalex_id=https://openalex.org/w2065270681"
+    ]
+  },
+  "configuration_fingerprint": "e33cfabaf3cb6126442be43d120970dd5477c43c3922a75ea8e61b4afe5f3e15",
+  "prediction_file": "predictions.jsonl",
+  "test_access": "forbidden",
+  "test_evaluated": false,
+  "_public_copy": {
+    "is_original_run_record": false,
+    "original_repository_path": "outputs/qwen_full_input_validation_comparison/technical_validation_full/run_manifest.json",
+    "original_sha256": "a4bd112cb55d2f64fd586865502af1e2708dbce0b479b72fedd91f0425ba0102",
+    "historical_endpoint_sha256": "0fa08c5c67460200a7062be19ebf839ca466dfb7d5ed20700ee5e3d388064503",
+    "original_configuration_fingerprints": [
+      "294f5f726f197aa5f6e92bf51661d13fd96d9ad4817429b6ad3174bf1d3b9a2d"
+    ],
+    "redactions": {
+      "endpoint": 1,
+      "windows_project_path": 0,
+      "windows_home_path": 0
+    }
+  }
+}

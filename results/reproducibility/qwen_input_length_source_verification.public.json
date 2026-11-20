@@ -1,0 +1,113 @@
+{
+  "scope": "frozen paired Validation predictions; no API calls or model inference",
+  "verified_utc": "2026-11-20T17:53:14.766047+00:00",
+  "validation_population": 22397,
+  "sample_records": 5000,
+  "sample_positive_records": 300,
+  "same_record_ids_order_review_labels": true,
+  "prompt_version": "qwen-zero-shot-screening-v2",
+  "prompt_sha256": "92d5ec3e57208464fdfafece65202a68d3363b790a64a9821cdfdc335317625a",
+  "matching_exact_prompt_hashes": {
+    "full": 5000,
+    "truncated": 5000
+  },
+  "same_api_configuration_except_mode": true,
+  "api_configuration": {
+    "model": "qwen3.8-flash",
+    "base_url": "<PRIVATE_API_ENDPOINT>",
+    "temperature": 0.0,
+    "enable_thinking": false,
+    "stream": false,
+    "request_json_object": true,
+    "max_retries": 3,
+    "max_tokens": 128
+  },
+  "requests_per_minute": 30.0,
+  "request_timeout_seconds": 90,
+  "screening_policy": "retain_unresolved_v1",
+  "run_created_utc": {
+    "full": "2026-11-12T23:20:41.017894+00:00",
+    "truncated": "2026-11-12T14:41:30.316201+00:00"
+  },
+  "prediction_first_last_utc": {
+    "full": {
+      "first": "2026-11-12T23:20:43.612937+00:00",
+      "last": "2026-11-13T02:13:22.808738+00:00"
+    },
+    "truncated": {
+      "first": "2026-11-12T14:41:37.683307+00:00",
+      "last": "2026-11-12T17:55:49.750296+00:00"
+    }
+  },
+  "outcome_counts": {
+    "full": {
+      "explicit_include": 121,
+      "explicit_exclude": 4811,
+      "uncertain": 68
+    },
+    "truncated": {
+      "explicit_include": 127,
+      "explicit_exclude": 4761,
+      "uncertain": 112
+    }
+  },
+  "anomaly_counts": {
+    "full": {},
+    "truncated": {}
+  },
+  "source_files": {
+    "experiment_config": {
+      "path": "outputs/qwen_full_input_validation_comparison/experiment_config.json",
+      "sha256": "6eefcf1580ee3f01de43a501fcc1d433a8c5a5576a5b6f2c377aa526baaea0f4"
+    },
+    "sample_manifest": {
+      "path": "outputs/qwen_full_input_validation_comparison/sample_manifest.csv",
+      "sha256": "77af031f2d93f81f672f7c49b84159af7a7b1af2275716de9b789fcf3104dbc3"
+    },
+    "sampling_summary": {
+      "path": "outputs/qwen_full_input_validation_comparison/sampling_summary.json",
+      "sha256": "cffea14c720f2e991a722d6eb1edd9584f090aca02fd66b0e2003b733bf5ccb7"
+    },
+    "truncation_audit": {
+      "path": "outputs/qwen_full_input_validation_comparison/truncation_audit.csv",
+      "sha256": "8406028f654753db854f21af5bb601347ce490f994b2f8da0345f7612bb10eca"
+    },
+    "truncation_summary": {
+      "path": "outputs/qwen_full_input_validation_comparison/truncation_summary.json",
+      "sha256": "1e86d76970627628b532192999e508b65db6583fc53db31746e4a210edfccf8c"
+    },
+    "full_manifest": {
+      "path": "outputs/qwen_full_input_validation_comparison/predictions_full/run_manifest.json",
+      "sha256": "e226cb5d063c5398bc66fa98cbdea905767f63c0a8b5c54d36aee012431d4e53"
+    },
+    "full_predictions": {
+      "path": "outputs/qwen_full_input_validation_comparison/predictions_full/predictions.jsonl",
+      "sha256": "147eef7c2f5193e2c2cf1308202391c1fa7f6d9c42c7d5184461bbeb496de53d"
+    },
+    "truncated_manifest": {
+      "path": "outputs/qwen_full_input_validation_comparison/predictions_truncated/run_manifest.json",
+      "sha256": "9f1d355b723932e047543a4bb5b7edf516c12c757d3b0e613f94b9982221cb23"
+    },
+    "truncated_predictions": {
+      "path": "outputs/qwen_full_input_validation_comparison/predictions_truncated/predictions.jsonl",
+      "sha256": "8907117a81472189849d600fe43ddfb93aa00c24d592c055ecab3b6a9ec363be"
+    },
+    "validation_csv": {
+      "path": "data/processed/splits/validation.csv",
+      "sha256": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12"
+    },
+    "criteria_xlsx": {
+      "path": "data/eligibility_criteria(排纳标准).xlsx",
+      "sha256": "7a682824979cf65fec650ba31f6375637a2fe0fb24e7d979b66d5cb55b369b7c"
+    }
+  },
+  "tokenizer_files_sha256": {
+    "config.json": "56bab767c02bc792897638feb8addc06d483d9c73769a5f554bbabea1f5507a1",
+    "tokenizer_config.json": "53b6f42b8b8daddbdc6d3532c324187a92b46c1602bd6e8d4ad5a413b4fc90e1",
+    "vocab.txt": "7b36651908a88bc38bda41b728b2a598191e0d3b553cbacf7b1e5f026d5b5b9f"
+  },
+  "input_difference_note": "Full uses raw field strings; Truncated uses PubMedBERT WordPiece prefix decoding with section markers. The comparison is between these two input pipelines, not an isolated length-only intervention.",
+  "sampling_note": "Validation sample is stratified to 300 positive and 4700 negative records; precision and workload reduction describe this sample, not the complete Validation population.",
+  "original_source_path": "results/qwen_input_length_sensitivity/source_verification.json",
+  "original_source_sha256": "22d6f095e76463cd19e4e4ff38b73b251303ba78a9a47af892d116cfd5baa80b"
+}

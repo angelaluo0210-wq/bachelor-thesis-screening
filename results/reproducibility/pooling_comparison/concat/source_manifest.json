@@ -1,0 +1,27 @@
+{
+  "experiment_id": "POOL-CONCAT",
+  "source_files_sha256": {
+    "config.json": "fb1a272a41c1fd2934aa9fe14eb73a172e8d3a70e85fdeb2ebdcef3d39909b62",
+    "validation_predictions.csv": "03d4e4d30430c634c35078b087ef7e8d819def6505f2e8ce28b76422d982ad62",
+    "metrics.json": "3be03b7a5684ca939adad24c43ce06fa24f726cd241a15cc89d0ff6e21157454",
+    "run_summary.json": "046cc2e8e0956b003f76a3a20771cb63fd42689920223ca0d5c2dc83202be67f",
+    "run.log": "74feb4f81cbf546c163e0b9856f8bc9daf11629e0474c6d135908f3f87a9ceee",
+    "training_history.csv": "7e4552bc1075df9803b58f1c5336661ecd80b7a1a850d229732b5f9a3650b14d",
+    "per_review_validation_metrics.csv": "edcd973eb1462836c492a38f38886e8cb95fb55910dca92acf7e512569fcc15f",
+    "best_pr_auc_classifier_head.pt": "521e501553d4b7e3b0c191d936486671c2b889ec60f376b3ebfe1520dc7d96c8"
+  },
+  "source_files": {
+    "config.json": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/config.json",
+    "validation_predictions.csv": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/validation_predictions.csv",
+    "metrics.json": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/metrics.json",
+    "run_summary.json": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/run_summary.json",
+    "run.log": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/run.log",
+    "training_history.csv": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/training_history.csv",
+    "per_review_validation_metrics.csv": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/per_review_validation_metrics.csv",
+    "best_pr_auc_classifier_head.pt": "outputs/pooling_comparison/formal/20260905_122936/concat/run_20260905_151150/best_pr_auc_classifier_head.pt"
+  },
+  "public_copy_note": "Config, summary and log have paths/tokens redacted; prediction copy omits title and external identifiers but retains frozen Validation row index. Metrics, history and per-review CSVs are exact copies.",
+  "validation_source_path": "data/processed/splits/validation.csv",
+  "validation_source_sha256": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12",
+  "checkpoint_not_copied": true
+}

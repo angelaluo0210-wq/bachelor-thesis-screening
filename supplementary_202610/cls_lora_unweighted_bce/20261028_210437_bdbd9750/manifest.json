@@ -1,0 +1,35 @@
+{
+  "status": "completed",
+  "created_utc": "2026-10-28T13:04:37.137964+00:00",
+  "smoke": false,
+  "experiment": "unweighted-ablation",
+  "pooling": "cls",
+  "training_strategy": "lora",
+  "test_disabled": true,
+  "seeds": [
+    42
+  ],
+  "comparison_mode": false,
+  "class_weighting": "unweighted",
+  "hyperparameters": {
+    "head_lr": 0.0001,
+    "adapter_lr": 5e-05,
+    "r": 8,
+    "alpha": 16,
+    "lora_dropout": 0.05,
+    "targets": [
+      "query",
+      "value"
+    ],
+    "batch_size": 32,
+    "epochs": 5,
+    "max_length": 512
+  },
+  "runs": [
+    {
+      "seed": 42,
+      "summary_path": "supplementary_202610/cls_lora_unweighted_bce/20261028_210437_bdbd9750/seed_42/lora/seed_42/cls/run_20261028_210543/run_summary.json",
+      "best_validation_ap": 0.11292696537981095
+    }
+  ]
+}

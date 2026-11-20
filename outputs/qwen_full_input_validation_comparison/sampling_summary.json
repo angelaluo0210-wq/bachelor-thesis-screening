@@ -1,0 +1,59 @@
+{
+  "method": "stratified random sample by review_key and gold_label; largest-remainder proportional quotas",
+  "random_seed": 42,
+  "targets": {
+    "include": 300,
+    "exclude": 4700
+  },
+  "available_by_label_review": {
+    "1": {
+      "Hall_2012": 104,
+      "Moran_2021": 110,
+      "Wassenaar_2017": 111,
+      "van_der_Valk_2021": 89
+    },
+    "0": {
+      "Hall_2012": 8688,
+      "Moran_2021": 5103,
+      "Wassenaar_2017": 7557,
+      "van_der_Valk_2021": 635
+    }
+  },
+  "allocated_by_label_review": {
+    "1": {
+      "Hall_2012": 75,
+      "Moran_2021": 80,
+      "Wassenaar_2017": 80,
+      "van_der_Valk_2021": 65
+    },
+    "0": {
+      "Hall_2012": 1857,
+      "Moran_2021": 1091,
+      "Wassenaar_2017": 1616,
+      "van_der_Valk_2021": 136
+    }
+  },
+  "selected_by_label_review": {
+    "1": {
+      "Hall_2012": 75,
+      "Moran_2021": 80,
+      "Wassenaar_2017": 80,
+      "van_der_Valk_2021": 65
+    },
+    "0": {
+      "Hall_2012": 1857,
+      "Moran_2021": 1091,
+      "Wassenaar_2017": 1616,
+      "van_der_Valk_2021": 136
+    }
+  },
+  "records": 5000,
+  "unique_source_records": 5000,
+  "reviews": [
+    "Hall_2012",
+    "Moran_2021",
+    "Wassenaar_2017",
+    "van_der_Valk_2021"
+  ],
+  "note": "This is a positive-enriched stratified sample; its class mix is not the Validation population prevalence."
+}

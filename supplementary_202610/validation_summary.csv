@@ -1,0 +1,7 @@
+summary_path,seed,pooling,training_strategy,class_weighting,pr_auc,roc_auc,recall,precision,fnr,f1,workload_reduction
+supplementary_202610/cls_lora_unweighted_bce/20261028_210437_bdbd9750/seed_42/lora/seed_42/cls/run_20261028_210543/run_summary.json,42,cls,lora,unweighted,0.11292696537981095,,,,,,
+supplementary_202610/cls_lora_multiseed/20261028_161144_dfbd2800/seed_123/lora/seed_123/cls/run_20261028_161244/run_summary.json,123,cls,lora,weighted,0.17937156305122948,,,,,,
+supplementary_202610/cls_lora_multiseed/20261028_161144_dfbd2800/seed_2026/lora/seed_2026/cls/run_20261028_183820/run_summary.json,2026,cls,lora,weighted,0.12500443544871326,,,,,,
+supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_42/lora/seed_42/mean/run_20261028_085737/run_summary.json,42,mean,lora,weighted,0.08585888997732527,,,,,,
+supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_123/lora/seed_123/mean/run_20261028_112223/run_summary.json,123,mean,lora,weighted,0.07908914001864409,,,,,,
+supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_2026/lora/seed_2026/mean/run_20261028_134719/run_summary.json,2026,mean,lora,weighted,0.059642818884827004,,,,,,

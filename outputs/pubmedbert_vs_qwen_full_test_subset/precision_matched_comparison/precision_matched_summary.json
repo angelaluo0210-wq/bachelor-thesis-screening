@@ -1,0 +1,60 @@
+{
+  "analysis": "precision_matched_post_hoc_exploratory_test_subset",
+  "warning": "The matching threshold was selected using Test labels. It is not an independently validated or pre-specified operating threshold.",
+  "records": 5000,
+  "positive_records": 100,
+  "negative_records": 4900,
+  "alignment": {
+    "manifest_pubmedbert_qwen_record_ids_identical": true,
+    "gold_labels_identical": true,
+    "frozen_prediction_labels_reproduced": true
+  },
+  "inputs": {
+    "outputs\\pubmedbert_vs_qwen_full_test_subset\\sample_manifest.csv": "a33d1477ca96f124d91f7a6559f707afa3bf2017364cadc1cffd4bd2d2338539",
+    "outputs\\pubmedbert_vs_qwen_full_test_subset\\pubmedbert_predictions_subset.csv": "b5b3fa3ae204caf95dc198f7c0e738ce61aaab7e677d43e50751e561a0aaea1e",
+    "outputs\\pubmedbert_vs_qwen_full_test_subset\\predictions_qwen_full\\predictions.jsonl": "755c4e96a2cd9a9435e4f97c8533811bbf6f355662f4ecdbb11945fe26060be6"
+  },
+  "original_frozen_threshold": 0.016082723,
+  "qwen_full": {
+    "tp": 47,
+    "fp": 342,
+    "tn": 4558,
+    "fn": 53,
+    "retained_for_manual_screening": 389,
+    "precision": 0.12082262210796915,
+    "recall": 0.47,
+    "fnr": 0.53,
+    "f1": 0.19222903885480572,
+    "workload_reduction": 0.9222
+  },
+  "pubmedbert_original": {
+    "tp": 100,
+    "fp": 3759,
+    "tn": 1141,
+    "fn": 0,
+    "retained_for_manual_screening": 3859,
+    "precision": 0.025913449080072558,
+    "recall": 1.0,
+    "fnr": 0.0,
+    "f1": 0.050517807527153326,
+    "workload_reduction": 0.2282
+  },
+  "pubmedbert_precision_matched": {
+    "threshold": 0.85556966,
+    "target_precision_qwen": 0.12082262210796915,
+    "precision_match_difference": 4.086954034032697e-06,
+    "absolute_precision_match_difference": 4.086954034032697e-06,
+    "tp": 76,
+    "fp": 553,
+    "tn": 4347,
+    "fn": 24,
+    "retained_for_manual_screening": 629,
+    "precision": 0.12082670906200318,
+    "recall": 0.76,
+    "fnr": 0.24,
+    "f1": 0.2085048010973937,
+    "workload_reduction": 0.8742
+  },
+  "candidate_thresholds": 4996,
+  "selection_rule": "minimize absolute difference from Qwen Full precision; among ties maximize recall; remaining exact ties choose largest threshold"
+}
