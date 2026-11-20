@@ -1,0 +1,7 @@
+metric,averaging,value
+recall,Micro,0.9957627118644068
+recall,Macro,0.9930555555555556
+precision,Micro,0.025477016478751086
+precision,Macro,0.037082455487100895
+workload_reduction,Micro,0.21804001356391997
+workload_reduction,Macro,0.16848168999849833
