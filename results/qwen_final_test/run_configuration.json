@@ -1,0 +1,48 @@
+{
+  "experiment": "qwen3.8_flash_zero_shot",
+  "phase": "final_test",
+  "configuration_fingerprint": "083e5a9e0eb36f272c22337def0a52f5cfade7e619057d8393958b1f95520119",
+  "model": "qwen3.8-flash",
+  "prompt_version": "qwen-zero-shot-screening-v2",
+  "prompt_sha256": "92d5ec3e57208464fdfafece65202a68d3363b790a64a9821cdfdc335317625a",
+  "api_parameters": {
+    "temperature": 0.0,
+    "enable_thinking": false,
+    "stream": false,
+    "request_json_object": true,
+    "max_retries": 3,
+    "requests_per_minute": 30.0
+  },
+  "screening_policy": "retain_unresolved_v1",
+  "population": {
+    "records": 23592,
+    "reviews": [
+      "Leenaars_2019",
+      "Muthu_2021",
+      "Radjenovic_2013",
+      "van_Dis_2020"
+    ],
+    "sampling": "forbidden"
+  },
+  "input_sha256": {
+    "test.csv": "23728ed5139430ee3531b4432a2acadcd49aff8c3d4180fa50f53b082e7ab658",
+    "criteria.xlsx": "7a682824979cf65fec650ba31f6375637a2fe0fb24e7d979b66d5cb55b369b7c"
+  },
+  "tokenizer_identity_sha256": "259df9b6b2080829ed89bd18bae0887439b547b1fa5991a359d096e7547fe3d5",
+  "runtime": {
+    "python": "3.12.4",
+    "transformers": "5.16.1"
+  },
+  "source_git_commit": "b45968fdd3eefd644083f672c6534216e3776c56",
+  "redaction": {
+    "excluded": [
+      "API key",
+      "endpoint/workspace URL",
+      "absolute local paths",
+      "raw data",
+      "per-record predictions",
+      "request/response logs",
+      "model weights"
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "status": "completed",
+  "created_utc": "2026-10-28T00:56:41.148316+00:00",
+  "smoke": false,
+  "pooling": "mean",
+  "training_strategy": "lora",
+  "test_disabled": true,
+  "seeds": [
+    42,
+    123,
+    2026
+  ],
+  "hyperparameters": {
+    "head_lr": 0.0001,
+    "adapter_lr": 5e-05,
+    "r": 8,
+    "alpha": 16,
+    "lora_dropout": 0.05,
+    "targets": [
+      "query",
+      "value"
+    ],
+    "batch_size": 32,
+    "epochs": 5,
+    "max_length": 512
+  },
+  "runs": [
+    {
+      "seed": 42,
+      "summary_path": "supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_42/lora/seed_42/mean/run_20261028_085737/run_summary.json",
+      "best_validation_ap": 0.08585888997732527,
+      "checkpoint_path": "supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_42/lora/seed_42/mean/run_20261028_085737/best_pr_auc_classifier_head.pt"
+    },
+    {
+      "seed": 123,
+      "summary_path": "supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_123/lora/seed_123/mean/run_20261028_112223/run_summary.json",
+      "best_validation_ap": 0.07908914001864409,
+      "checkpoint_path": "supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_123/lora/seed_123/mean/run_20261028_112223/best_pr_auc_classifier_head.pt"
+    },
+    {
+      "seed": 2026,
+      "summary_path": "supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_2026/lora/seed_2026/mean/run_20261028_134719/run_summary.json",
+      "best_validation_ap": 0.059642818884827004,
+      "checkpoint_path": "supplementary_202610/mean_lora/20261028_085641_aaeca089/seed_2026/lora/seed_2026/mean/run_20261028_134719/best_pr_auc_classifier_head.pt"
+    }
+  ]
+}

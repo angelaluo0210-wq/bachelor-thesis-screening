@@ -1,0 +1,58 @@
+{
+  "status": "complete",
+  "selection_data": "validation_only",
+  "target_recall": 0.95,
+  "selection_rule": "largest_threshold_with_validation_recall_at_least_target",
+  "population": 22397,
+  "identity_and_labels_match_in_order": true,
+  "ap_implementation": "sklearn.metrics.average_precision_score via trainer.calculate_metrics",
+  "workload_reduction_definition": "(TN + FN) / N = predicted exclusion fraction",
+  "configuration_check": {
+    "matched_fields": [
+      "training_strategy",
+      "pooling",
+      "seed",
+      "batch_size",
+      "epochs",
+      "max_length",
+      "dropout",
+      "learning_rate",
+      "head_learning_rate",
+      "adapter_learning_rate",
+      "lora_r",
+      "lora_alpha",
+      "lora_dropout",
+      "lora_target_modules",
+      "checkpoint_selection_metric",
+      "optimizer"
+    ],
+    "differences": {},
+    "intentional_loss_difference": {
+      "weighted_pos_weight": 62.38868894601542,
+      "unweighted_pos_weight": null
+    },
+    "nontraining_record_differences": [
+      "comparison_mode",
+      "output_dir",
+      "model_name_or_path",
+      "split_dir",
+      "criteria_path",
+      "environment"
+    ]
+  },
+  "threshold_sources": {
+    "weighted": "results\\formal_training_strategy_20260910\\thresholds\\selected_validation_threshold.json",
+    "unweighted": "results\\weighted_bce_ablation\\unweighted_validation_threshold.json"
+  },
+  "input_sha256": {
+    "data\\processed\\splits\\validation.csv": "58e82d8565c1dd0f183fd75364129824b279e3b80f50534cff81bf3f89b9eb12",
+    "results\\formal_training_strategy_20260910\\lora_5e-5\\config.json": "7d934d0fb2a6d0461bb2b3ffc81ce92356adaa45a4b6f8b2075df026d28a67b7",
+    "supplementary_202610\\cls_lora_unweighted_bce\\20261028_210437_bdbd9750\\seed_42\\lora\\seed_42\\cls\\run_20261028_210543\\config.json": "8b056072ac91deb7ab085b8ef9d5183881fe5f45cc59f6efc68d3e176d10cae5",
+    "outputs\\training_strategy_comparison\\20260910_150708_3f3f0eb0\\lora\\adapter_lr_5e-5\\lora\\seed_42\\cls\\run_20260910_191547\\validation_predictions.csv": "e36fe0b4978d9707c84a87b2114935d5d972e0a4e7a35323c2c605186b23b05e",
+    "supplementary_202610\\cls_lora_unweighted_bce\\20261028_210437_bdbd9750\\seed_42\\lora\\seed_42\\cls\\run_20261028_210543\\validation_predictions.csv": "37b6d5926a9154f1861e3a66bfaad0bd9c605af8e9d5c4c21fb4b923561ff8b4",
+    "results\\formal_training_strategy_20260910\\thresholds\\selected_validation_threshold.json": "f1997e524d3220987177dae8cd7e3084051d52025bfe3d5a3ab2c71642f091b7",
+    "results\\weighted_bce_ablation\\unweighted_validation_threshold.json": "2fca0ffe047f25ee8c2cc175d64590cc6e89af7e190ecc774b126f6cdda39332",
+    "outputs\\training_strategy_comparison\\20260910_150708_3f3f0eb0\\lora\\adapter_lr_5e-5\\lora\\seed_42\\cls\\run_20260910_191547\\best_pr_auc_classifier_head.pt": "f635ed339a6902d4f2c695b27baf3ed977813c1fa361c9b61f9cf293fe44a6d1",
+    "supplementary_202610\\cls_lora_unweighted_bce\\20261028_210437_bdbd9750\\seed_42\\lora\\seed_42\\cls\\run_20261028_210543\\best_pr_auc_classifier_head.pt": "29e83b4b46c217dd8613363e5d73af208398b5caf7ace79126c4681685fa1764"
+  }
+}

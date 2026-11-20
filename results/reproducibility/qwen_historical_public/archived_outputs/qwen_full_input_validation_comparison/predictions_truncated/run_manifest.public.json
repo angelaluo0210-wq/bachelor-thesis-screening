@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-11-12T14:41:30.316201+00:00",
+  "configuration": {
+    "phase": "validation_comparison_execution",
+    "mode": "truncated",
+    "records": 5000,
+    "qwen_context_window": 991808,
+    "context_check": {
+      "method": "utf8_bytes_plus_chat_allowance_not_token_count",
+      "safe_limit_bytes": 900000
+    },
+    "api": {
+      "model": "qwen3.8-flash",
+      "base_url": "<HISTORICAL_WORKSPACE_ENDPOINT_REDACTED>",
+      "temperature": 0.0,
+      "enable_thinking": false,
+      "stream": false,
+      "request_json_object": true,
+      "max_retries": 3,
+      "max_tokens": 128
+    },
+    "requests_per_minute": 30.0,
+    "difference_from_legacy_test": {
+      "max_tokens": {
+        "legacy": null,
+        "comparison": 128
+      }
+    },
+    "technical_selection_record_ids": null
+  },
+  "configuration_fingerprint": "8593cc30078fa20d5256c37318e4307b15b8be8a7d01b1a20f7a9a4051f5358c",
+  "prediction_file": "predictions.jsonl",
+  "test_access": "forbidden",
+  "test_evaluated": false,
+  "_public_copy": {
+    "is_original_run_record": false,
+    "original_repository_path": "outputs/qwen_full_input_validation_comparison/predictions_truncated/run_manifest.json",
+    "original_sha256": "9f1d355b723932e047543a4bb5b7edf516c12c757d3b0e613f94b9982221cb23",
+    "historical_endpoint_sha256": "0fa08c5c67460200a7062be19ebf839ca466dfb7d5ed20700ee5e3d388064503",
+    "original_configuration_fingerprints": [
+      "7771c532fbcd3204843961bad81fe780e4cafa0d690672308345ad4750bd9d84"
+    ],
+    "redactions": {
+      "endpoint": 1,
+      "windows_project_path": 0,
+      "windows_home_path": 0
+    }
+  }
+}

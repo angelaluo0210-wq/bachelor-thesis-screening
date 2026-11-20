@@ -1,0 +1,28 @@
+{
+  "analysis_type": "descriptive_only",
+  "causal_conclusion_drawn": false,
+  "relevant_review": {
+    "review": "van_Dis_2020",
+    "total_positive_records": 72,
+    "positive_records_with_missing_abstract": 12,
+    "false_negatives_with_missing_abstract": 2
+  },
+  "complete_test": {
+    "total_positive_records": 472,
+    "positive_records_with_missing_abstract": 12,
+    "false_negatives_with_missing_abstract": 2
+  },
+  "contingency": [
+    {
+      "group": "Abstract available",
+      "included_articles": 460,
+      "false_negatives": 0
+    },
+    {
+      "group": "Abstract missing",
+      "included_articles": 12,
+      "false_negatives": 2
+    }
+  ],
+  "interpretation_limit": "Both FN records had missing abstracts. This descriptive fact does not establish causality."
+}

@@ -1,0 +1,41 @@
+{
+  "status": "completed",
+  "created_utc": "2026-10-28T08:11:44.669661+00:00",
+  "smoke": false,
+  "experiment": "multiseed",
+  "pooling": "cls",
+  "training_strategy": "lora",
+  "test_disabled": true,
+  "seeds": [
+    123,
+    2026
+  ],
+  "comparison_mode": true,
+  "class_weighting": "weighted",
+  "hyperparameters": {
+    "head_lr": 0.0001,
+    "adapter_lr": 5e-05,
+    "r": 8,
+    "alpha": 16,
+    "lora_dropout": 0.05,
+    "targets": [
+      "query",
+      "value"
+    ],
+    "batch_size": 32,
+    "epochs": 5,
+    "max_length": 512
+  },
+  "runs": [
+    {
+      "seed": 123,
+      "summary_path": "supplementary_202610/cls_lora_multiseed/20261028_161144_dfbd2800/seed_123/lora/seed_123/cls/run_20261028_161244/run_summary.json",
+      "best_validation_ap": 0.17937156305122948
+    },
+    {
+      "seed": 2026,
+      "summary_path": "supplementary_202610/cls_lora_multiseed/20261028_161144_dfbd2800/seed_2026/lora/seed_2026/cls/run_20261028_183820/run_summary.json",
+      "best_validation_ap": 0.12500443544871326
+    }
+  ]
+}
