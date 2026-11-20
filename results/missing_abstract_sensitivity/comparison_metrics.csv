@@ -1,0 +1,3 @@
+strategy,threshold,tp,fp,tn,fn,recall,precision,workload_reduction,predicted_include_count,predicted_exclude_count,total_records
+Original formal Test strategy,0.016082723,470,17978,5142,2,0.9957627118644068,0.025477016478751086,0.21804001356391997,18448,5144,23592
+Post-hoc retain missing Abstract,0.016082723,472,18468,4652,0,1.0,0.0249208025343189,0.19718548660562904,18940,4652,23592
